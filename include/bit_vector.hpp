@@ -82,9 +82,9 @@ int BitVector::construct()
   fill_bit_vector_with_one_bits();
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after fill_bit_vector_with_one_bits()\n");)
 
-  CHECK_WITHOUT_RETURN(cudaMemcpy(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice);)
+  cudaError_t err = cudaMemcpy(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice);
 
-  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after cudaMemcpy\n");)
+  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after cudaMemcpy, err nro %d\n", err);)
 
   rank_index.construct(host_data);
 
