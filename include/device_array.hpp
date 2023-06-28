@@ -1,6 +1,6 @@
 #pragma once
+#include "../include/globals.hpp"
 #include "../include/gpu/cuda.hpp"
-#include "../include/gpu/globals.hpp"
 
 <template typename T = u64> struct DeviceArray
 {
