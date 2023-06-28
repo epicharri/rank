@@ -6,10 +6,9 @@ int main(int argc, char **argv)
 {
 
   cudaDeviceProp prop;
-  epic::Parameters parameters;
-  if (parameters.read_arguments(argc, argv, prop))
+  RankSearch searcher();
+  if (searcher.parameters.read_arguments(argc, argv, prop))
     return 0;
-  RankSearch searcher(parameters, DEVICE_IS_NVIDIA_A100);
   if (searcher.create())
     return 0;
 

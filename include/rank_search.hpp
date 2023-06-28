@@ -19,20 +19,18 @@ public:
   epic::Parameters parameters;
   epic::gpu::DeviceStream device_stream;
   BitVector bit_vector;
-  bool device_is_nvidia_a100;
+  bool device_is_nvidia_a100 = true;
   int create();
   int search();
-  RankSearch(epic::Parameters &, bool);
+  RankSearch() = default;
   ~RankSearch();
 };
 
-RankSearch::RankSearch(epic::Parameters &the_parameters, bool the_device_is_nvidia_a100)
+RankSearch::RankSearch()
 {
-  parameters = the_parameters;
   device_stream.create();
 
   DEBUG_CODE(fprintf(stderr, "parameters.bits_in_bit_vector %" PRIu64 "\n", parameters.bits_in_bit_vector);)
-  device_is_nvidia_a100 = the_device_is_nvidia_a100;
 }
 
 RankSearch::~RankSearch()
@@ -42,7 +40,7 @@ RankSearch::~RankSearch()
 int RankSearch::create()
 {
   device_stream.start_timer();
-  DEBUG_CODE(fprintf(stderr, "device_stream timer started\n");)
+  DEBUG_CODE(fprintf(stderr, "Device_stream timer started\n");)
   auto start = START_TIME;
   int created = bit_vector.create(parameters, device_stream);
   int constructed = bit_vector.construct(device_stream);
