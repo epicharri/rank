@@ -20,7 +20,7 @@ DeviceArray::~DeviceArray()
   }
 }
 
-int DeviceArray::create(u64 the_size_in_bytes, epic::gpu::DeviceStream device_stream)
+int DeviceArray::create(u64 the_size_in_bytes, epic::gpu::DeviceStream &device_stream)
 {
   size_in_bytes = the_size_in_bytes;
   CHECK(cudaMallocAsync((void **)&data, the_size_in_bytes, device_stream.stream));
