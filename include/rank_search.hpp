@@ -33,6 +33,8 @@ RankSearch::~RankSearch()
 int RankSearch::create()
 {
   device_stream.create();
+  DEBUG_CODE(fprintf(stderr, "Device_stream timer created\n");)
+
   device_stream.start_timer();
   DEBUG_CODE(fprintf(stderr, "Device_stream timer started\n");)
   auto start = START_TIME;
