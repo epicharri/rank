@@ -17,6 +17,7 @@ class RankSearch
 
 public:
   epic::Parameters parameters;
+  BitVector bit_vector;
   bool device_is_nvidia_a100;
   int create();
   int search();
@@ -37,10 +38,14 @@ RankSearch::~RankSearch()
 
 int RankSearch::create()
 {
-  BitVector bit_vector;
+  auto start = START_TIME;
   int created = bit_vector.create(parameters);
   int constructed = bit_vector.construct();
-  fprintf(stderr, "created = %d, constructed = %d", created, constructed);
+  auto stop = STOP_TIME;
+  DEBUG_CODE(fprintf(stderr, "created = %d, constructed = %d\n", created, constructed););
+  float millis = DURATION_IN_MILLISECONDS(start, stop);
+  BENCHMARK_CODE(fprintf(stderr, "Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n"), millis);
+
   return 0;
 }
 
