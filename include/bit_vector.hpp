@@ -64,7 +64,12 @@ int BitVector::create(epic::Parameters &parameters, epic::gpu::DeviceStream &dev
 
 int BitVector::construct(epic::gpu::DeviceStream &device_stream)
 {
+  auto start = START_TIME;
   fill_bit_vector_with_one_bits();
+  auto stop = STOP_TIME;
+  float millis = DURATION_IN_MILLISECONDS(start, stop);
+  BENCHMARK_CODE(fprintf(stderr, "Creating the bit vector takes %f ms\n", millis);)
+
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after fill_bit_vector_with_one_bits()\n");)
 
   cudaError_t err = cudaMemcpyAsync(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream);

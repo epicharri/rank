@@ -43,7 +43,6 @@ namespace epic
 
         void DeviceStream::start_timer()
         {
-            DEBUG_CODE(fprintf(stderr, "Device_stream start_timer() function starts.\n");)
             cudaEventRecord(start, stream);
         }
 
