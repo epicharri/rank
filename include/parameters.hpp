@@ -192,7 +192,7 @@ namespace epic
 
             if (std::regex_match(parameter, Options.query_positions_count))
             {
-                query_positions_count = std::stoull(parameter.substr(24, par.length()));
+                query_positions_count = std::stoull(parameter.substr(24, parameter.length()));
             }
             /*
             if (std::regex_match(parameter, Options.k_regex))
@@ -279,7 +279,7 @@ namespace epic
         std::string bit_vector_content = "Bit vector content: after one zero, all bits are ones.";
         if (bit_vector_data_type == epic::kind::random_bit_vector)
         {
-            bit_vector_content = "Bit vector content: randomly generated bits."
+            bit_vector_content = "Bit vector content: randomly generated bits.";
         }
         fprintf(stderr, "%s\n", bit_vector_content.data());
 

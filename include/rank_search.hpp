@@ -1,7 +1,7 @@
 #pragma once
+#include "../include/bit_vector.hpp"
 #include "../include/globals.hpp"
 #include "../include/gpu/cuda.hpp"
-#include "../include/gpu/device_memory.hpp"
 #include "../include/gpu/device_stream.hpp"
 #include "../include/parameters.hpp"
 #include "../include/utils/helpers.hpp"
@@ -11,7 +11,6 @@
 #include <iostream>
 #include <omp.h>
 #include <string>
-#include <vector>
 
 namespace epic
 {
@@ -26,7 +25,7 @@ namespace epic
     ~RankSearch();
   };
 
-  RankSearch::RankSearch(Parameters &the_parameters)
+  RankSearch::RankSearch(Parameters &the_parameters, bool device_is_nvidia_a100)
   {
     parameters = the_parameters;
   }
@@ -45,7 +44,8 @@ namespace epic
 
   int RankSearch::search()
   {
-    fprintf(stderr, "RankSearch::search() called.") return 0;
+    fprintf(stderr, "RankSearch::search() called.\n");
+    return 0;
   }
 }
 /*
