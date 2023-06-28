@@ -132,7 +132,7 @@ inline u64 RankIndex::popcount_basicblock(u64 *data, u64 i)
 }
 
 template <u32 words_in_basicblock>
-int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &bit_vector_data, epic::gpu::DeviceStream &device_stream, u64 abs_count_before = 0ULL, )
+int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &bit_vector_data, epic::gpu::DeviceStream &device_stream, u64 abs_count_before = 0ULL)
 {
   u64 absolute_number_of_ones;
   u64 bits_in_hyperblock = 1ULL << log_2_of_hyperblock_size;
