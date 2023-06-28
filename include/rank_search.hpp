@@ -24,7 +24,7 @@ public:
   ~RankSearch();
 };
 
-RankSearch::RankSearch(eic::asctime &the_parameters, bool the_device_is_nvidia_a100)
+RankSearch::RankSearch(epic::Parameters &the_parameters, bool the_device_is_nvidia_a100)
 {
   parameters = the_parameters;
   device_is_nvidia_a100 = the_device_is_nvidia_a100;

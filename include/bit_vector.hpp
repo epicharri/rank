@@ -27,7 +27,6 @@ struct BitVector
   u32 bits_in_superblock = 0U;
   u64 number_of_words_in_one_hyperblock_in_host = 0ULL;
   int fill_bit_vector_with_one_bits();
-  int read_data_and_create_rank_index(u64);
   void calculate_number_of_words();
   void calculate_number_of_words_padded();
   void calculate_hyperblock_size();
@@ -54,7 +53,7 @@ struct BitVector
 
 BitVector::~BitVector(){};
 
-int BitVector::create(Parameters &parameters)
+int BitVector::create(epic::Parameters &parameters)
 {
   bit_vector_content = parameters.bit_vector_data_type;
   if (bit_vector_content == epic::kind::from_file_bit_vector)
@@ -82,14 +81,6 @@ int BitVector::construct()
 
   rank_index.construct(host_data);
 
-  return 0;
-}
-
-int BitVector::read_data_and_create_rank_index(u64 number_of_bits_in_one_batch)
-{
-  fill_hyperblock_with_one_bits();
-  rank_index.compute_rank_index_for_one_hyperblock(number_of_words_in_one_hyperblock_in_host);
-  //
   return 0;
 }
 

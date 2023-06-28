@@ -83,13 +83,13 @@ inline int RankIndex::allocate_memory()
   return 0;
 }
 
-int RankIndex::construct(HostArray &bit_vector_data, u64 abs_count_before = 0ULL)
+int RankIndex::construct(HostArray &bit_vector_data)
 {
-  if (compute_index(bit_vector_data))
+  if (compute_index(bit_vector_data, 0ULL))
     return 1;
-  if (cudaMemcpy(device_layer_0, host_layer_0, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice))
+  if (cudaMemcpy(device_layer_0.data, host_layer_0.data, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice))
     return 1;
-  if (cudaMemcpy(device_layer_0, host_layer_0, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice))
+  if (cudaMemcpy(device_layer_12.data, host_layer_12.data, host_layer_12.size_in_bytes, cudaMemcpyHostToDevice))
     return 1;
   return 0;
 }
