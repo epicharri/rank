@@ -21,16 +21,15 @@ struct RankIndex
   u64 number_of_words_in_one_hyperblock_layer_12_in_host = 0ULL;
   u64 number_of_words_in_one_hyperblock_in_host = 0ULL;
   u64 absolute_count = 0ULL;
-  int create(u64, u64, u32, int);
+  int create(u64, u64, u32, int, epic::gpu::DeviceStream &);
   int init(u64, u64, u32, int);
-  int allocate_memory();
-  // int compute_rank_index(/*Bitvector needed somehow!*/);
+  int allocate_memory(epic::gpu::DeviceStream &);
   template <u32 words_in_basicblock>
-  int precount_the_structures_based_on_words_in_basicblock(HostArray &, u64);
+  int precount_the_structures_based_on_words_in_basicblock(HostArray &, u64, epic::gpu::DeviceStream &);
   template <u32 words_in_basicblock>
   u64 popcount_basicblock(u64 *, u64);
 
-  int construct(HostArray &);
+  int construct(HostArray &, epic::gpu::DeviceStream &);
   int compute_index(HostArray &, u64);
 
   RankIndex() = default;
@@ -39,11 +38,11 @@ struct RankIndex
 
 RankIndex::~RankIndex(){};
 
-int RankIndex::create(u64 the_number_of_bits, u64 the_number_of_words_padded_bit_vector, u32 the_bits_in_superblock, int the_rank_version)
+int RankIndex::create(u64 the_number_of_bits, u64 the_number_of_words_padded_bit_vector, u32 the_bits_in_superblock, int the_rank_version, epic::gpu::DeviceStream device_stream)
 {
   if (init(the_number_of_bits, the_number_of_words_padded_bit_vector, the_bits_in_superblock, the_rank_version))
     return 1;
-  if (allocate_memory())
+  if (allocate_memory(device_stream))
     return 1;
   return 0;
 }
@@ -64,12 +63,12 @@ inline int RankIndex::init(u64 the_number_of_bits, u64 the_number_of_words_padde
   return 0;
 }
 
-inline int RankIndex::allocate_memory()
+inline int RankIndex::allocate_memory(epic::gpu::DeviceStream &device_stream)
 {
   if (device_layer_0.create(
-          number_of_words_padded_layer_0 * 8ULL) |
+          number_of_words_padded_layer_0 * 8ULL, device_stream) |
       device_layer_12.create(
-          number_of_words_padded_layer_12 * 8ULL))
+          number_of_words_padded_layer_12 * 8ULL, device_stream))
   {
     return 1;
   }
@@ -83,7 +82,7 @@ inline int RankIndex::allocate_memory()
   return 0;
 }
 
-int RankIndex::construct(HostArray &bit_vector_data)
+int RankIndex::construct(HostArray &bit_vector_data, epic::gpu::DeviceStream device_stream)
 {
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before compute_index()\n");)
   if (compute_index(bit_vector_data, 0ULL))
@@ -91,28 +90,28 @@ int RankIndex::construct(HostArray &bit_vector_data)
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), after compute_index()\n");)
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before cudaMemcpy L0()\n");)
 
-  if (cudaMemcpy(device_layer_0.data, host_layer_0.data, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice))
+  if (cudaMemcpyAsync(device_layer_0.data, host_layer_0.data, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice, device_stream))
     return 1;
 
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before cudaMemcpy L0()\n");)
 
-  if (cudaMemcpy(device_layer_12.data, host_layer_12.data, host_layer_12.size_in_bytes, cudaMemcpyHostToDevice))
+  if (cudaMemcpyAsync(device_layer_12.data, host_layer_12.data, host_layer_12.size_in_bytes, cudaMemcpyHostToDevice, device_stream))
     return 1;
   return 0;
 }
 
-int RankIndex::compute_index(HostArray &bit_vector_data, u64 abs_count_before = 0ULL)
+int RankIndex::compute_index(HostArray &bit_vector_data, u64 abs_count_before = 0ULL, epic::gpu::DeviceStream device_stream)
 {
   if (bits_in_superblock == 256)
-    return precount_the_structures_based_on_words_in_basicblock<1>(bit_vector_data, abs_count_before);
+    return precount_the_structures_based_on_words_in_basicblock<1>(bit_vector_data, abs_count_before, device_stream);
   else if (bits_in_superblock == 512)
-    return precount_the_structures_based_on_words_in_basicblock<2>(bit_vector_data, abs_count_before);
+    return precount_the_structures_based_on_words_in_basicblock<2>(bit_vector_data, abs_count_before, device_stream);
   else if (bits_in_superblock == 1024)
-    return precount_the_structures_based_on_words_in_basicblock<4>(bit_vector_data, abs_count_before);
+    return precount_the_structures_based_on_words_in_basicblock<4>(bit_vector_data, abs_count_before, device_stream);
   else if (bits_in_superblock == 2048)
-    return precount_the_structures_based_on_words_in_basicblock<8>(bit_vector_data, abs_count_before);
+    return precount_the_structures_based_on_words_in_basicblock<8>(bit_vector_data, abs_count_before, device_stream);
   else if (bits_in_superblock == 4096)
-    return precount_the_structures_based_on_words_in_basicblock<16>(bit_vector_data, abs_count_before);
+    return precount_the_structures_based_on_words_in_basicblock<16>(bit_vector_data, abs_count_before, device_stream);
   else
     return 1;
 }
@@ -132,7 +131,7 @@ inline u64 RankIndex::popcount_basicblock(u64 *data, u64 i)
 }
 
 template <u32 words_in_basicblock>
-int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &bit_vector_data, u64 abs_count_before = 0ULL)
+int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &bit_vector_data, u64 abs_count_before = 0ULL, epic::gpu::DeviceStream device_stream)
 {
   u64 absolute_number_of_ones;
   u64 bits_in_hyperblock = 1ULL << log_2_of_hyperblock_size;

@@ -17,6 +17,7 @@ class RankSearch
 
 public:
   epic::Parameters parameters;
+  epic::gpu::DeviceStream device_stream;
   BitVector bit_vector;
   bool device_is_nvidia_a100;
   int create();
@@ -38,13 +39,20 @@ RankSearch::~RankSearch()
 
 int RankSearch::create()
 {
+  device_stream.create();
+  device_stream.start_timer();
   auto start = START_TIME;
-  int created = bit_vector.create(parameters);
-  int constructed = bit_vector.construct();
+  int created = bit_vector.create(parameters, device_stream);
+  int constructed = bit_vector.construct(device_stream);
+  device_stream.stop_timer();
+  float millis_stream = device_stream.duration_in_millis(); // This synchronizes the stream, i.e. blocks CPU until ready.
   auto stop = STOP_TIME;
+
   DEBUG_CODE(fprintf(stderr, "created = %d, constructed = %d\n", created, constructed););
   float millis = DURATION_IN_MILLISECONDS(start, stop);
-  BENCHMARK_CODE(fprintf(stderr, "Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis);)
+  BENCHMARK_CODE(fprintf(stderr, "GPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis_stream);)
+
+  BENCHMARK_CODE(fprintf(stderr, "CPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis);)
 
   return 0;
 }
