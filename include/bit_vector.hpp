@@ -2,7 +2,6 @@
 #include "../include/device_array.hpp"
 #include "../include/enums.hpp"
 #include "../include/globals.hpp"
-#include "../include/gpu/device_stream.hpp"
 #include "../include/host_array.hpp"
 #include "../include/parameters.hpp"
 #include "../include/rank_index.hpp"
@@ -22,10 +21,11 @@ struct BitVector
   u64 number_of_bits = 0ULL;
   u64 number_of_words = 0ULL;
   u64 number_of_words_padded = 0ULL;
+  std::string filename = "";
   // u64 number_of_words_in_one_hyperblock_in_host = 0ULL;
   int bit_vector_content = epic::kind::one_zero_and_then_all_ones_bit_vector;
   u32 bits_in_superblock = 0U;
-  int fill_hyperblock_with_one_bits(u64);
+  int fill_bit_vector_with_one_bits();
   int read_data_and_create_rank_index(u64);
   void calculate_number_of_words();
   void calculate_number_of_words_padded();
@@ -34,6 +34,7 @@ struct BitVector
   // int allocate_memory_for_data_array();
   int create(Parameters &);
   // int compute_rank_index(u64);
+  /*
   int construct();
   int create_for_benchmarking(u64, int);
   int create_from_file(std::string);
@@ -43,6 +44,7 @@ struct BitVector
   int convert_endianess_of_bit_vector();
   int read_bit_vector_from_file();
   int read();
+  */
 
   BitVector() = default;
   ~BitVector();
@@ -150,6 +152,7 @@ inline void BitVector::calculate_number_of_words_padded()
   number_of_words_padded = (epic::utils::round_up_first_to_multiple_of_second(number_of_bits + 1ULL, 4096ULL) / 64ULL);
 }
 
+/*
 int BitVector::create_for_benchmarking(u64 bits_in_bit_vector, int bit_vector_content)
 {
   filename = t_filename;
@@ -301,3 +304,4 @@ int BitVector::convert_endianess_of_bit_vector()
   }
   return 0;
 }
+*/

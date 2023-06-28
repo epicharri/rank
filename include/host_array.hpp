@@ -2,9 +2,9 @@
 #include "../include/globals.hpp"
 #include "../include/gpu/cuda.hpp"
 
-<template typename T = u64> struct HostArray
+struct HostArray
 {
-  T *data = nullptr;
+  u64 *data = nullptr;
   u64 size_in_bytes = 0ULL;
   int create(u64, bool);
   HostArray() = default;

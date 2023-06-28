@@ -4,7 +4,6 @@
 #include "../include/globals.hpp"
 #include "../include/gpu/cuda.hpp"
 #include "../include/host_array.hpp"
-#include <omp.h>
 
 struct RankIndex
 {
