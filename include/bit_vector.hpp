@@ -66,7 +66,7 @@ int BitVector::create(epic::Parameters &parameters)
   DEBUG_CODE(fprintf(stderr, "In BitVector::create(): parameters.number_of_bits = %" PRIu64 "\n");)
   calculate_number_of_words();
   calculate_number_of_words_padded();
-  DEBUG_CODE((stderr, "In BitVector::create: number_of_words_padded = %" PRIu64 "\n");)
+  DEBUG_CODE(fprintf(stderr, "In BitVector::create: number_of_words_padded = %" PRIu64 "\n");)
   calculate_hyperblock_size();
   if (allocate_memory_for_data())
     return 1;
