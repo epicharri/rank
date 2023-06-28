@@ -12,42 +12,43 @@
 #include <omp.h>
 #include <string>
 
-namespace epic
+class RankSearch
 {
-  class RankSearch
-  {
 
-  public:
-    Parameters parameters;
-    int create();
-    int search();
-    RankSearch(Parameters &, bool);
-    ~RankSearch();
-  };
+public:
+  epic::Parameters parameters;
+  bool device_is_nvidia_a100;
+  int create();
+  int search();
+  RankSearch(epic::Parameters &, bool);
+  ~RankSearch();
+};
 
-  RankSearch::RankSearch(Parameters &the_parameters, bool device_is_nvidia_a100)
-  {
-    parameters = the_parameters;
-  }
-
-  RankSearch::~RankSearch()
-  {
-  }
-
-  RankSearch::create()
-  {
-    BitVector bit_vector;
-    int created = bit_vector.create(parameters);
-    int constructed = bit_vector.construct();
-    fprintf(stderr, "created = %d, constructed = %d", created, constructed);
-  }
-
-  int RankSearch::search()
-  {
-    fprintf(stderr, "RankSearch::search() called.\n");
-    return 0;
-  }
+RankSearch::RankSearch(eic::asctime &the_parameters, bool the_device_is_nvidia_a100)
+{
+  parameters = the_parameters;
+  device_is_nvidia_a100 = the_device_is_nvidia_a100;
 }
+
+RankSearch::~RankSearch()
+{
+}
+
+int RankSearch::create()
+{
+  BitVector bit_vector;
+  int created = bit_vector.create(parameters);
+  int constructed = bit_vector.construct();
+  fprintf(stderr, "created = %d, constructed = %d", created, constructed);
+  return 0;
+}
+
+int RankSearch::search()
+{
+  fprintf(stderr, "RankSearch::search() called.\n");
+  return 0;
+}
+
 /*
   int RankSearch::search()
   {
