@@ -27,6 +27,7 @@ public:
 RankSearch::RankSearch(epic::Parameters &the_parameters, bool the_device_is_nvidia_a100)
 {
   parameters = the_parameters;
+  DEBUG_CODE(fprintf(stderr, "parameters.bits_in_bit_vector %" PRIu64 "\n", parameters.bits_in_bit_vector);)
   device_is_nvidia_a100 = the_device_is_nvidia_a100;
 }
 

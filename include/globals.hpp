@@ -25,7 +25,7 @@ typedef u8 byte32_t __attribute__((vector_size(32 * sizeof(u8))));
 // This must be changed with other than nvidia a100
 #define DEVICE_IS_NVIDIA_A100 true
 
-// #define DEBUG
+#define DEBUG
 #define BENCHMARK
 
 #ifdef DEBUG

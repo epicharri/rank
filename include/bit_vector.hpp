@@ -63,6 +63,7 @@ int BitVector::create(epic::Parameters &parameters)
   }
   bits_in_superblock = parameters.bits_in_superblock;
   number_of_bits = parameters.bits_in_bit_vector;
+  DEBUG_CODE(fprintf(stderr, "In BitVector::create(): parameters.number_of_bits = %" PRIu64 "\n");)
   calculate_number_of_words();
   calculate_number_of_words_padded();
   calculate_hyperblock_size();
