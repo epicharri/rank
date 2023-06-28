@@ -44,7 +44,7 @@ int RankSearch::create()
   auto stop = STOP_TIME;
   DEBUG_CODE(fprintf(stderr, "created = %d, constructed = %d\n", created, constructed););
   float millis = DURATION_IN_MILLISECONDS(start, stop);
-  BENCHMARK_CODE(fprintf(stderr, "Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n"), millis);
+  BENCHMARK_CODE(fprintf(stderr, "Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis);)
 
   return 0;
 }
