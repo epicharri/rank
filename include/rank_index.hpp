@@ -76,7 +76,7 @@ inline int RankIndex::allocate_memory()
   if (host_layer_0.create(
           number_of_words_padded_layer_0 * 8ULL, epic::kind::not_write_only) |
       host_layer_12.create(
-          number_of_words_in_one_hyperblock_layer_12_in_host * 8ULL, epic::kind::not_write_only))
+          number_of_words_padded_layer_12 * 8ULL, epic::kind::not_write_only))
   {
     return 1;
   }
@@ -85,10 +85,17 @@ inline int RankIndex::allocate_memory()
 
 int RankIndex::construct(HostArray &bit_vector_data)
 {
+  DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before compute_index()\n");)
   if (compute_index(bit_vector_data, 0ULL))
     return 1;
+  DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), after compute_index()\n");)
+  DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before cudaMemcpy L0()\n");)
+
   if (cudaMemcpy(device_layer_0.data, host_layer_0.data, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice))
     return 1;
+
+  DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before cudaMemcpy L0()\n");)
+
   if (cudaMemcpy(device_layer_12.data, host_layer_12.data, host_layer_12.size_in_bytes, cudaMemcpyHostToDevice))
     return 1;
   return 0;

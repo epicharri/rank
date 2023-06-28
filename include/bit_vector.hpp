@@ -88,7 +88,7 @@ int BitVector::construct()
 
   rank_index.construct(host_data);
 
-  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after rank_index.construct()\n");)
+  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after rank_index.construct()\n");) // Here???
 
   return 0;
 }
