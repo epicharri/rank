@@ -6,7 +6,7 @@ int main(int argc, char **argv)
 {
 
   cudaDeviceProp prop;
-  RankSearch searcher;
+  RankSearch searcher();
   if (searcher.parameters.read_arguments(argc, argv, prop))
     return 0;
   if (searcher.create())
