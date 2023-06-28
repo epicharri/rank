@@ -63,10 +63,10 @@ int BitVector::create(epic::Parameters &parameters)
   }
   bits_in_superblock = parameters.bits_in_superblock;
   number_of_bits = parameters.bits_in_bit_vector;
-  DEBUG_CODE(fprintf(stderr, "In BitVector::create(): parameters.number_of_bits = %" PRIu64 "\n");)
+  DEBUG_CODE(fprintf(stderr, "In BitVector::create(): parameters.number_of_bits = %" PRIu64 "\n", number_of_bits);)
   calculate_number_of_words();
   calculate_number_of_words_padded();
-  DEBUG_CODE(fprintf(stderr, "In BitVector::create: number_of_words_padded = %" PRIu64 "\n");)
+  DEBUG_CODE(fprintf(stderr, "In BitVector::create: number_of_words_padded = %" PRIu64 "\n", number_of_words_padded);)
   calculate_hyperblock_size();
   if (allocate_memory_for_data())
     return 1;
@@ -80,10 +80,15 @@ int BitVector::create(epic::Parameters &parameters)
 int BitVector::construct()
 {
   fill_bit_vector_with_one_bits();
+  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after fill_bit_vector_with_one_bits()\n");)
 
-  cudaMemcpy(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice);
+  CHECK_WITHOUT_RETURN(cudaMemcpy(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice);)
+
+  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after cudaMemcpy\n");)
 
   rank_index.construct(host_data);
+
+  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after rank_index.construct()\n");)
 
   return 0;
 }
