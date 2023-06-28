@@ -1,4 +1,3 @@
-#pragma once
 #include "../include/globals.hpp"
 #include "../include/parameters.hpp"
 #include "../include/rank_search.hpp"

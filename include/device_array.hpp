@@ -1,7 +1,6 @@
 #pragma once
-#include "../include/cuda.hpp"
-#include "../include/globals.hpp"
-#include <omp.h>
+#include "../include/gpu/cuda.hpp"
+#include "../include/gpu/globals.hpp"
 
 <template typename T = u64> struct DeviceArray
 {
