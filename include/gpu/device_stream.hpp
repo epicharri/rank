@@ -37,8 +37,8 @@ namespace epic
         void DeviceStream::create()
         {
             err = cudaStreamCreate(&stream);
-            cudaEventCreateWithFlags(&start, cudaDeviceScheduleBlockingSync);
-            cudaEventCreateWithFlags(&stop, cudaDeviceScheduleBlockingSync);
+            cudaEventCreate(&start);
+            cudaEventCreate(&stop);
         }
 
         void DeviceStream::start_timer()
