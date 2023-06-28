@@ -15,7 +15,7 @@ HostArray::~HostArray()
 {
   if (data)
   {
-    CHECK(cudaFreeHost(data));
+    CHECK_WITHOUT_RETURN(cudaFreeHost(data));
   }
 };
 
@@ -25,11 +25,11 @@ int HostArray::create(u64 the_size_in_bytes, bool write_only)
   if (write_only)
   {
     // Faster if write-only by host. Does not fill CPU cache.
-    CHECK(cudaHostAlloc((void **)&data, the_size_in_bytes, cudaHostAllocWriteCombined););
+    CHECK(cudaHostAlloc((void **)&data, the_size_in_bytes, cudaHostAllocWriteCombined));
   }
   else
   {
-    CHECK(cudaHostAlloc((void **)&data, the_size_in_bytes, cudaHostAllocDefault););
+    CHECK(cudaHostAlloc((void **)&data, the_size_in_bytes, cudaHostAllocDefault));
   }
   return 0;
 }

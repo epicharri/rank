@@ -32,7 +32,8 @@ struct BitVector
   void calculate_hyperblock_size();
   int allocate_memory_for_data();
   // int allocate_memory_for_data_array();
-  int create(Parameters &);
+  int create(epic::Parameters &);
+  int construct();
   // int compute_rank_index(u64);
   /*
   int construct();

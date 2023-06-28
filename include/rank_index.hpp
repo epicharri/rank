@@ -85,11 +85,11 @@ inline int RankIndex::allocate_memory()
 
 int RankIndex::construct(HostArray &bit_vector_data, u64 abs_count_before = 0ULL)
 {
-  if (compute_index, bit_vector_data)
+  if (compute_index(bit_vector_data))
     return 1;
-  if (CHECK(cudaMemcpy(device_layer_0, host_layer_0, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice)))
+  if (cudaMemcpy(device_layer_0, host_layer_0, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice))
     return 1;
-  if (CHECK(cudaMemcpy(device_layer_0, host_layer_0, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice)))
+  if (cudaMemcpy(device_layer_0, host_layer_0, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice))
     return 1;
   return 0;
 }
@@ -127,6 +127,7 @@ inline u64 RankIndex::popcount_basicblock(u64 *data, u64 i)
 template <u32 words_in_basicblock>
 int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &bit_vector_data, u64 abs_count_before = 0ULL)
 {
+  u64 absolute_number_of_ones;
   u64 bits_in_hyperblock = 1ULL << log_2_of_hyperblock_size;
   u64 words_in_hyperblock = (bits_in_hyperblock / ((u64)bits_in_superblock));
   u32 one_if_sb_4096 = (u32)(bits_in_superblock == 4096U);
@@ -136,13 +137,13 @@ int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &b
   u32 rel_count = 0U;
   for (u32 i_layer_0 = 0U; i_layer_0 < number_of_words_padded_layer_0; i_layer_0++)
   {
-    layer_0[i_layer_0] = absolute_number_of_ones;
+    host_layer_0[i_layer_0] = absolute_number_of_ones;
     rel_count = 0U;
     for (u32 i_layer_12_rel = 0U; i_layer_12_rel < words_in_hyperblock; i_layer_12_rel += 1U)
     {
       if (i_layer_12 >= number_of_words_padded_layer_12 - 1ULL)
       {
-        layer_12[i_layer_12] = ((u64)rel_count) << (32 + one_if_sb_4096);
+        host_layer_12[i_layer_12] = ((u64)rel_count) << (32 + one_if_sb_4096);
         return 0;
       }
       u64 countBB[4];
@@ -154,23 +155,23 @@ int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &b
       i_data += (words_in_basicblock << 2);
       if (rank_version == epic::kind::poppy)
       {
-        layer_12[i_layer_12] = (((u64)rel_count) << (32 + one_if_sb_4096)) | (((countBB[0]) << (20 + 2 * one_if_sb_4096)) | ((countBB[1]) << (10 + one_if_sb_4096)) | (countBB[2]));
+        host_layer_12[i_layer_12] = (((u64)rel_count) << (32 + one_if_sb_4096)) | (((countBB[0]) << (20 + 2 * one_if_sb_4096)) | ((countBB[1]) << (10 + one_if_sb_4096)) | (countBB[2]));
       }
       else if (rank_version == epic::kind::cum_poppy)
       { // Only if superblock size is 256, 512, 1024, or 2048
         if (bits_in_superblock < 2048U)
         {
-          layer_12[i_layer_12] = (((u64)rel_count) << 32) |
-                                 ((((u64)countBB[0]) << 20) |
-                                  (((u64)(countBB[0] + countBB[1])) << 10) |
-                                  ((u64)(countBB[0] + countBB[1] + countBB[2])));
+          host_layer_12[i_layer_12] = (((u64)rel_count) << 32) |
+                                      ((((u64)countBB[0]) << 20) |
+                                       (((u64)(countBB[0] + countBB[1])) << 10) |
+                                       ((u64)(countBB[0] + countBB[1] + countBB[2])));
         }
         if (bits_in_superblock == 2048U)
         {
-          layer_12[i_layer_12] = (((u64)rel_count) << 32) |
-                                 ((((u64)countBB[0]) << 22) |
-                                  (((u64)(countBB[0] + countBB[1])) << 11) |
-                                  ((u64)(countBB[0] + countBB[1] + countBB[2])));
+          host_layer_12[i_layer_12] = (((u64)rel_count) << 32) |
+                                      ((((u64)countBB[0]) << 22) |
+                                       (((u64)(countBB[0] + countBB[1])) << 11) |
+                                       ((u64)(countBB[0] + countBB[1] + countBB[2])));
         }
       }
       i_layer_12 += 1ULL;

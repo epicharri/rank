@@ -15,13 +15,13 @@ DeviceArray::~DeviceArray()
 {
   if (data)
   {
-    CHECK(cudaFree(data));
+    CHECK_WITHOUT_RETURN(cudaFree(data));
   }
 }
 
 int DeviceArray::create(u64 the_size_in_bytes)
 {
   size_in_bytes = the_size_in_bytes;
-  CHECK(cudaMalloc((void **)&data, the_size_in_bytes););
+  CHECK(cudaMalloc((void **)&data, the_size_in_bytes));
   return 0;
 }
