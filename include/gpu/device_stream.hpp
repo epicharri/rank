@@ -14,8 +14,6 @@ namespace epic
             cudaError_t err;
             cudaEvent_t start;
             cudaEvent_t stop;
-            cudaEvent_t start_2;
-            cudaEvent_t stop_2;
             void create();
             void start_timer();
             void stop_timer();
@@ -45,6 +43,7 @@ namespace epic
 
         void DeviceStream::start_timer()
         {
+            DEBUG_CODE(fprintf(stderr, "Device_stream start_timer() function starts.\n");)
             cudaEventRecord(start, stream);
         }
 
