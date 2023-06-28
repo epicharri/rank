@@ -56,18 +56,18 @@ int BitVector::create(epic::Parameters &parameters, epic::gpu::DeviceStream &dev
   if (allocate_memory_for_data(device_stream))
     return 1;
   DEBUG_CODE(fprintf(stderr, "Memory allocated for the bit vector.\n");)
-  if (rank_index.create(number_of_bits, number_of_words_padded, parameters.bits_in_superblock, parameters.rank_structure_version))
+  if (rank_index.create(number_of_bits, number_of_words_padded, parameters.bits_in_superblock, parameters.rank_structure_version, device_stream))
     return 1;
   DEBUG_CODE(fprintf(stderr, "In BitVector, after rank_index.create()\n");)
   return 0;
 }
 
-int BitVector::construct(epic::gpu::DeviceStream device_stream)
+int BitVector::construct(epic::gpu::DeviceStream &device_stream)
 {
   fill_bit_vector_with_one_bits();
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after fill_bit_vector_with_one_bits()\n");)
 
-  cudaError_t err = cudaMemcpyAsync(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice, device_stream);
+  cudaError_t err = cudaMemcpyAsync(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream);
 
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after cudaMemcpy, err nro %d\n", err);)
 
@@ -103,9 +103,9 @@ int BitVector::fill_bit_vector_with_one_bits()
   return 0;
 }
 
-int BitVector::allocate_memory_for_data(epic::gpu::DeviceStream device_stream)
+int BitVector::allocate_memory_for_data(epic::gpu::DeviceStream &device_stream)
 {
-  if (host_data.create(number_of_words_padded * 8ULL, epic::kind::not_write_only, device_stream))
+  if (host_data.create(number_of_words_padded * 8ULL, epic::kind::not_write_only))
     return 1;
   if (device_data.create(number_of_words_padded * 8ULL, device_stream))
     return 1;

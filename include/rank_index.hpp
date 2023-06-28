@@ -26,7 +26,7 @@ struct RankIndex
   int init(u64, u64, u32, int);
   int allocate_memory(epic::gpu::DeviceStream &);
   template <u32 words_in_basicblock>
-  int precount_the_structures_based_on_words_in_basicblock(HostArray &, u64, epic::gpu::DeviceStream &);
+  int precount_the_structures_based_on_words_in_basicblock(HostArray &, epic::gpu::DeviceStream &, u64);
   template <u32 words_in_basicblock>
   u64 popcount_basicblock(u64 *, u64);
 
@@ -86,7 +86,7 @@ inline int RankIndex::allocate_memory(epic::gpu::DeviceStream &device_stream)
 int RankIndex::construct(HostArray &bit_vector_data, epic::gpu::DeviceStream &device_stream)
 {
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before compute_index()\n");)
-  if (compute_index(bit_vector_data, 0ULL))
+  if (compute_index(bit_vector_data, device_stream, 0ULL))
     return 1;
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), after compute_index()\n");)
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before cudaMemcpy L0()\n");)
@@ -132,7 +132,7 @@ inline u64 RankIndex::popcount_basicblock(u64 *data, u64 i)
 }
 
 template <u32 words_in_basicblock>
-int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &bit_vector_data, u64 abs_count_before = 0ULL, epic::gpu::DeviceStream &device_stream)
+int RankIndex::precount_the_structures_based_on_words_in_basicblock(HostArray &bit_vector_data, epic::gpu::DeviceStream &device_stream, u64 abs_count_before = 0ULL, )
 {
   u64 absolute_number_of_ones;
   u64 bits_in_hyperblock = 1ULL << log_2_of_hyperblock_size;
