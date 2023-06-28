@@ -10,19 +10,16 @@ namespace epic
         struct DeviceStream
         {
 
-            deviceStream_t stream;
-            deviceError_t err;
-            deviceEvent_t start;
-            deviceEvent_t stop;
-            deviceEvent_t start_2;
-            deviceEvent_t stop_2;
+            cudaStream_t stream;
+            cudaError_t err;
+            cudaEvent_t start;
+            cudaEvent_t stop;
+            cudaEvent_t start_2;
+            cudaEvent_t stop_2;
             void create();
             void start_timer();
             void stop_timer();
-            void start_timer_2();
-            void stop_timer_2();
             float duration_in_millis();
-            float duration_in_millis_2();
             void synchronize_stream();
 
             DeviceStream() = default;
@@ -32,62 +29,41 @@ namespace epic
         DeviceStream::~DeviceStream()
         {
             DEBUG_BEFORE_DESTRUCT("DeviceStream (ALL)");
-            deviceEventDestroy(start);
-            deviceEventDestroy(stop);
-            deviceEventDestroy(start_2);
-            deviceEventDestroy(stop_2);
-            err = deviceStreamDestroy(stream);
+            cudaEventDestroy(start);
+            cudaEventDestroy(stop);
+
+            err = cudaStreamDestroy(stream);
             DEBUG_AFTER_DESTRUCT("DeviceStream (ALL)");
         }
 
         void DeviceStream::create()
         {
-            err = deviceStreamCreate(&stream);
-            deviceEventCreate(&start);
-            deviceEventCreate(&stop);
-            deviceEventCreate(&start_2);
-            deviceEventCreate(&stop_2);
+            err = cudaStreamCreate(&stream);
+            cudaEventCreateWithFlags(&start, cudaDeviceScheduleBlockingSync);
+            cudaEventCreateWithFlags(&stop, cudaDeviceScheduleBlockingSync);
         }
 
         void DeviceStream::start_timer()
         {
-            deviceEventRecord(start, stream);
+            cudaEventRecord(start, stream);
         }
 
         void DeviceStream::stop_timer()
         {
-            deviceEventRecord(stop, stream);
-        }
-
-        void DeviceStream::start_timer_2()
-        {
-            deviceEventRecord(start_2, stream);
-        }
-
-        void DeviceStream::stop_timer_2()
-        {
-            deviceEventRecord(stop_2, stream);
+            cudaEventRecord(stop, stream);
         }
 
         float DeviceStream::duration_in_millis()
         {
             float milliseconds;
-            deviceEventSynchronize(stop);
-            deviceEventElapsedTime(&milliseconds, start, stop);
-            return milliseconds;
-        }
-
-        float DeviceStream::duration_in_millis_2()
-        {
-            float milliseconds;
-            deviceEventSynchronize(stop_2);
-            deviceEventElapsedTime(&milliseconds, start_2, stop_2);
+            cudaEventSynchronize(stop);
+            cudaEventElapsedTime(&milliseconds, start, stop);
             return milliseconds;
         }
 
         void DeviceStream::synchronize_stream()
         {
-            deviceStreamSynchronize(stream);
+            cudaStreamSynchronize(stream);
         }
     }
 }

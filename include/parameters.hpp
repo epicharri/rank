@@ -12,50 +12,60 @@ namespace epic
 
     struct
     {
-        std::string command = "benchmark";
-        std::string without_presearch = "--without-presearch";
+        //        std::string command = "benchmark";
+        //        std::string rank_benchmark = "--rank_benchmark"; // For benchmarking rank only.
+        //        std::string without_presearch = "--without-presearch";
         std::string do_not_store_results = "--do-not-store-results";
         std::string with_shuffles = "--with-shuffles";
         std::regex bits_in_superblock_regex{"^--bits-in-superblock=(256|512|1024|2048|4096)$"};
+        std::regex bits_in_bit_vector{"^--bits-in-bit-vector=([0-9]+)$"};
+        std::string random_bit_vector = "--random-bit-vector";
+        std::string one_zero_and_then_all_ones_bit_vector = "--one-zero-and-then-all-ones-bit-vector";
+        std::regex query_positions_count{"^--query-positions-count=([0-9]+)$"};
         std::regex device_set_limit_presearch_regex{"^--device-set-limit-presearch=(32|64|128)$"};
         std::regex device_set_limit_search_regex{"^--device-set-limit-search=(32|64|128)$"};
-        std::regex k_regex{"^--k=([3-9]|([1-2][0-9])|3[0-2])$"};
-        std::regex k_presearch_regex{"^--k-presearch=([1-9]|(1[0-5]))$"};
-        std::regex filename_a_regex{"^--file-a=.+$"};
-        std::regex filename_c_regex{"^--file-c=.+$"};
-        std::regex filename_g_regex{"^--file-g=.+$"};
-        std::regex filename_t_regex{"^--file-t=.+$"};
-        std::regex filename_queries_regex{"^--file-queries=.+$"};
-        std::regex filename_answers_regex{"^--file-answers=.+$"};
+        //        std::regex k_regex{"^--k=([3-9]|([1-2][0-9])|3[0-2])$"};
+        //        std::regex k_presearch_regex{"^--k-presearch=([1-9]|(1[0-5]))$"};
+        //        std::regex filename_a_regex{"^--file-a=.+$"};
+        //        std::regex filename_c_regex{"^--file-c=.+$"};
+        //        std::regex filename_g_regex{"^--file-g=.+$"};
+        //        std::regex filename_t_regex{"^--file-t=.+$"};
+        //        std::regex filename_queries_regex{"^--file-queries=.+$"};
+        //        std::regex filename_answers_regex{"^--file-answers=.+$"};
         std::regex threads_per_block_regex{"^--threads-per-block=([0-9][0-9][0-9]?[0-9]?)$"};
         std::regex rank_structure_poppy_regex{"^--rank-structure=poppy$"};
         std::regex rank_structure_cum_poppy_regex{"^--rank-structure=cum-poppy$"};
-        std::regex rank_structure_flat_poppy_regex{"^--rank-structure=flat-poppy$"};
-        std::regex rank_word_size_regex{"^--rank-word-size=(32|64)$"};
-        std::regex use_unified_memory_for_queries_regex{"^--unified-searches$"};
+        //        std::regex rank_structure_flat_poppy_regex{"^--rank-structure=flat-poppy$"};
+        //        std::regex rank_word_size_regex{"^--rank-word-size=(32|64)$"};
+        //        std::regex use_unified_memory_for_queries_regex{"^--unified-searches$"};
 
     } Options;
 
     struct Parameters
     {
-        bool with_presearch = true;
-        u32 bits_in_superblock = 1024U;
+        u64 bits_in_bit_vector = 0ULL;
+        int bit_vector_data_type = epic::kind::one_zero_and_then_all_ones_bit_vector; // Default
+        u64 query_positions_count = 0ULL;
+
+        //        bool with_presearch = true;
+        //        bool rank_benchmark = false;
+        u32 bits_in_superblock = 1024U; // Default
         int device_set_limit_presearch = 64;
         int device_set_limit_search = 64;
         bool with_shuffles = false;
         bool store_results = true;
-        int rank_structure_version = kind::poppy;
-        int rank_data_word_size = 64;
-        u32 k = 30U;
-        u32 k_presearch = 12U;
+        int rank_structure_version = kind::poppy; // Default
+        int rank_data_word_size = 64;             // Default
+                                                  //        u32 k = 30U;
+                                                  //        u32 k_presearch = 12U;
         u32 threads_per_block = 0U;
-        bool use_unified_memory_for_queries = false;
-        std::string filename_A = "";
-        std::string filename_C = "";
-        std::string filename_G = "";
-        std::string filename_T = "";
-        std::string fileQueries = "";
-        std::string fileAnswers = "";
+        //        bool use_unified_memory_for_queries = false;
+        //        std::string filename_A = "";
+        //        std::string filename_C = "";
+        //        std::string filename_G = "";
+        //        std::string filename_T = "";
+        //        std::string fileQueries = "";
+        //        std::string fileAnswers = "";
 
         void print_copyright();
         void print_help();
@@ -67,7 +77,7 @@ namespace epic
 #ifdef BENCHMARK
         fprintf(stderr, "\n------------------------------\n");
 #else
-        fprintf(stderr, "\nSBWT-searches in GPU, Copyright (C) 2022  Harri Kähkönen\nThis program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation. See https://github.com/epicharri/sbwt/LICENSE.txt.\n\n");
+        fprintf(stderr, "\nRank function in GPU, Copyright (C) 2023  Harri Kähkönen\nThis program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License version 2 as published by the Free Software Foundation. See https://github.com/epicharri/rank/LICENSE.txt.\n\n");
 #endif
     }
 
@@ -101,16 +111,23 @@ namespace epic
         for (int i = 0; i < arguments.size(); i++)
         {
             std::string parameter = arguments[i];
-            if (parameter.compare(Options.without_presearch) == 0)
-            { // == 0 means equality
-                with_presearch = false;
-                continue;
-            }
+            /*            if (parameter.compare(Options.without_presearch) == 0)
+                        { // == 0 means equality
+                            with_presearch = false;
+                            continue;
+                        }
+                        if (parameter.compare(Options.rank_benchmark) == 0)
+                        { // == 0 means equality
+                            rank_benchmark = true;
+                            continue;
+                        }
+                        */
             if (parameter.compare(Options.do_not_store_results) == 0)
             { // == 0 means equality
                 store_results = false;
                 continue;
             }
+
             if (parameter.compare(Options.with_shuffles) == 0)
             { // == 0 means equality
                 with_shuffles = true;
@@ -127,17 +144,19 @@ namespace epic
                 rank_structure_version = epic::kind::cum_poppy;
                 continue;
             }
+            /*
             if (std::regex_match(parameter, Options.rank_structure_flat_poppy_regex))
             {
                 rank_structure_version = epic::kind::flat_poppy;
                 continue;
             }
+
             if (std::regex_match(parameter, Options.rank_word_size_regex))
             {
                 rank_data_word_size = std::stoi(parameter.substr(12, 2));
                 continue;
             }
-
+            */
             if (std::regex_match(parameter, Options.bits_in_superblock_regex))
             {
                 bits_in_superblock = std::stoi(parameter.substr(21, 4));
@@ -153,6 +172,29 @@ namespace epic
                 device_set_limit_search = std::stoi(parameter.substr(26, 3));
                 continue;
             }
+
+            if (std::regex_match(parameter, Options.bits_in_bit_vector))
+            {
+                bits_in_bit_vector = std::stoull(parameter.substr(21, parameter.length()));
+            }
+
+            if (parameter.compare(Options.random_bit_vector) == 0)
+            { // == 0 means equality
+                bit_vector_data_type = epic::kind::random_bit_vector;
+                continue;
+            }
+
+            if (parameter.compare(Options.one_zero_and_then_all_ones_bit_vector) == 0)
+            { // == 0 means equality
+                bit_vector_data_type = epic::kind::one_zero_and_then_all_ones_bit_vector;
+                continue;
+            }
+
+            if (std::regex_match(parameter, Options.query_positions_count))
+            {
+                query_positions_count = std::stoull(parameter.substr(24, par.length()));
+            }
+            /*
             if (std::regex_match(parameter, Options.k_regex))
             {
                 k = (u32)std::stoi(parameter.substr(4, 2));
@@ -198,6 +240,7 @@ namespace epic
                 use_unified_memory_for_queries = true;
                 continue;
             }
+            */
             if (std::regex_match(parameter, Options.threads_per_block_regex))
             {
                 u32 par_threads_per_block = (u32)std::stoi(parameter.substr(20, 4));
@@ -212,22 +255,34 @@ namespace epic
                 continue;
             }
         }
+        /*
         fprintf(stderr, "Filename of the bit vector A: %s\n", filename_A.c_str());
         fprintf(stderr, "Filename of the bit vector C: %s\n", filename_C.c_str());
         fprintf(stderr, "Filename of the bit vector G: %s\n", filename_G.c_str());
         fprintf(stderr, "Filename of the bit vector T: %s\n", filename_T.c_str());
         fprintf(stderr, "Filename of the query file: %s\n", fileQueries.c_str());
-
+        */
         if (threads_per_block == 0U)
             threads_per_block = max_threads_per_block;
-        fprintf(stderr, "Rank structure data size: %d\n", rank_data_word_size);
+        fprintf(stderr, "Rank structure word size: %d\n", rank_data_word_size);
         std::string version = "";
         if (rank_structure_version == kind::poppy)
             version = "poppy";
         if (rank_structure_version == kind::cum_poppy)
             version = "cum-poppy";
+        /*
         if (rank_structure_version == kind::flat_poppy)
             version = "flat-poppy";
+        */
+        fprintf(stderr, "Bits in the bit vector = %" PRIu64 "\n", bits_in_bit_vector);
+
+        std::string bit_vector_content = "Bit vector content: after one zero, all bits are ones.";
+        if (bit_vector_data_type == epic::kind::random_bit_vector)
+        {
+            bit_vector_content = "Bit vector content: randomly generated bits."
+        }
+        fprintf(stderr, "%s\n", bit_vector_content.data());
+
         fprintf(stderr, "Rank version: %s\n", version.c_str());
         fprintf(stderr, "Bits in superblock = %d.\n", bits_in_superblock);
         if (with_shuffles &&
@@ -239,6 +294,7 @@ namespace epic
         {
             fprintf(stderr, "Without shuffles.\n");
         }
+        /*
         if (with_presearch)
             fprintf(stderr, "With presearch.\n");
         else
@@ -263,13 +319,14 @@ namespace epic
         {
             k_presearch = 0U;
         }
-
+        */
         fprintf(stderr, "Set LimitMaxL2FetchGranularity in presearch to %d.\n", device_set_limit_presearch);
         fprintf(stderr, "Set LimitMaxL2FetchGranularity in search to %d.\n\n", device_set_limit_search);
         BENCHMARK_CODE(fprintf(stderr, "Threads per block: %" PRIu32 ".\n", threads_per_block);)
+        /*
         if (use_unified_memory_for_queries)
             fprintf(stderr, "Using unified memory for query data and positions.\n");
-
+        */
         if ((bits_in_superblock == 4096) && (rank_structure_version != kind::poppy))
         {
             fprintf(stderr, "Superblock size 4096 bits is supported only in the rank structure version poppy. Please choose some other parameters.\n");
@@ -279,7 +336,7 @@ namespace epic
 
             fprintf(stderr, "Device name: %s\n", prop.name);
 
-            DEBUG_CODE(
+            BENCHMARK_CODE(
                 fprintf(stderr, "Device Number: %d\n", 0);
                 fprintf(stderr, "  Device name: %s\n", prop.name);
                 fprintf(stderr, "  multiProcessorCount: %d\n", prop.multiProcessorCount);

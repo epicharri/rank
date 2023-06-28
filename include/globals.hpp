@@ -19,7 +19,7 @@ using int64 = int64_t;
 
 typedef u8 byte32_t __attribute__((vector_size(32 * sizeof(u8))));
 
-#define REGULAR_POPPY true // true: regular poppy with absolute basic block counts,
+// #define REGULAR_POPPY true // true: regular poppy with absolute basic block counts,
 // false = poppy with cumulative basic block counts
 
 // This must be changed with other than nvidia a100

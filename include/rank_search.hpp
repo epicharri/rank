@@ -1,10 +1,5 @@
 #pragma once
-#include "../epicseq/kmer_data.hpp"
-#include "../epicseq/results_persister.hpp"
-#include "../epicseq/search_caller.hpp"
-#include "../epicseq/start_positions.hpp"
 #include "../globals.hpp"
-#include "../gpu/create_kmer_string.hpp"
 #include "../gpu/cuda.hpp"
 #include "../gpu/device_memory.hpp"
 #include "../gpu/device_stream.hpp"
@@ -20,81 +15,41 @@
 
 namespace epic
 {
-  class KmerSearch
+  class RankSearch
   {
 
   public:
-    std::vector<char> raw_data;
-    std::vector<int64> start_positions;
-
-    KmerData kmer_data;
-    SearchCaller search_caller;
-    ResultsPersister persister;
-    u64 number_of_letters = 0ULL;
-    u64 number_of_letters_padded = 0ULL; // Rounded up to be multiple of 32 + additional 32 letters.
-    u64 number_of_rows = 0ULL;
-    u64 number_of_positions = 0ULL;
     Parameters parameters;
-    u32 kmer_size;
-    std::size_t assumed_row_length = 100;
-    std::string filename = "";
-    std::size_t size_of_file = 0; // In bytes.
-    float millis = 0.0;
-    float millis_read_file = 0.0;
-    float millis_allocate_kmer_data_memory = 0.0;
-    float millis_parse_kmer_string = 0.0;
-    float millis_create = 0.0;
-    float millis_create_positions = 0.0;
-    float millis_parse_kmer_string_in_gpu = 0.0;
-    float millis_transfer_kmer_raw_data_to_device = 0.0;
-    // epic::gpu::DeviceMemory dm;
-    int call_search(epic::gpu::DeviceMemory &);
-    int search(epic::gpu::DeviceMemory &);
-    void print_performance_info();
-    bool test_kmer_string(epic::gpu::DeviceMemory &);
-    KmerSearch(std::string, Parameters &);
-    KmerSearch(char *, Parameters &);
-    ~KmerSearch();
-
-  private:
-    int read_size(std::ifstream &);
-    int read_file(std::ifstream &, std::size_t pos);
-
-    int read_file_at_once(std::ifstream &, std::size_t pos);
-    int read_file_at_once_concurrently();
-
-    int allocate_memory();
-    int add_paddings();
-    int allocate_kmer_data_memory(epic::gpu::DeviceMemory &);
-    int parse_kmer_string(epic::gpu::DeviceMemory &);
-    int parse_kmer_string_par(epic::gpu::DeviceMemory &);
-    int parse_kmer_string_in_gpu(epic::gpu::DeviceMemory &);
-    int create_positions_in_gpu(epic::gpu::DeviceMemory &);
-    int save_results_to_file(epic::gpu::DeviceMemory &);
-
-    u8 bytes[4][4] = {{0, 0, 0, 0}, {64, 16, 4, 1}, {128, 32, 8, 2}, {192, 48, 12, 3}};
-    u8 bits[256] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int create();
+    int search();
+    RankSearch(Parameters &, bool);
+    ~RankSearch();
   };
 
-  KmerSearch::KmerSearch(std::string t_filename, Parameters &t_parameters)
+  RankSearch::RankSearch(Parameters &the_parameters)
   {
-    parameters = t_parameters;
-    kmer_size = t_parameters.k;
-    filename = t_filename;
+    parameters = the_parameters;
   }
 
-  KmerSearch::KmerSearch(char *t_filename, Parameters &t_parameters)
-  {
-    parameters = t_parameters;
-    kmer_size = t_parameters.k;
-    filename = t_filename;
-  }
-
-  KmerSearch::~KmerSearch()
+  RankSearch::~RankSearch()
   {
   }
 
-  int KmerSearch::search(epic::gpu::DeviceMemory &dm)
+  RankSearch::create()
+  {
+    BitVector bit_vector;
+    int created = bit_vector.create(parameters);
+    int constructed = bit_vector.construct();
+    fprintf(stderr, "created = %d, constructed = %d", created, constructed);
+  }
+
+  int RankSearch::search()
+  {
+    fprintf(stderr, "RankSearch::search() called.") return 0;
+  }
+}
+/*
+  int RankSearch::search()
   {
     auto start_create_and_search = START_TIME;
     auto start_create = START_TIME;
@@ -152,14 +107,14 @@ namespace epic
     return 0;
   }
 
-  int KmerSearch::save_results_to_file(epic::gpu::DeviceMemory &dm)
+  int RankSearch::save_results_to_file(epic::gpu::DeviceMemory &dm)
   {
     if (persister.save_results_to_file(start_positions, kmer_data, dm, parameters, kmer_size))
       return 1;
     return 0;
   }
 
-  int KmerSearch::call_search(epic::gpu::DeviceMemory &dm)
+  int RankSearch::call_search(epic::gpu::DeviceMemory &dm)
   {
     epic::SearchCaller search_caller;
     search_caller.search(parameters, dm, kmer_data);
@@ -171,7 +126,7 @@ namespace epic
     return 0;
   }
 
-  int KmerSearch::create_positions_in_gpu(epic::gpu::DeviceMemory &dm)
+  int RankSearch::create_positions_in_gpu(epic::gpu::DeviceMemory &dm)
   {
     epic::DeviceStartPositions positions_creator;
     if (positions_creator.create_positions(
@@ -184,7 +139,7 @@ namespace epic
     return 0;
   }
 
-  int KmerSearch::allocate_kmer_data_memory(epic::gpu::DeviceMemory &dm)
+  int RankSearch::allocate_kmer_data_memory(epic::gpu::DeviceMemory &dm)
   {
     auto start = START_TIME;
     kmer_data.number_of_positions = number_of_positions;
@@ -200,7 +155,7 @@ namespace epic
     return 0;
   }
 
-  int KmerSearch::parse_kmer_string_par(epic::gpu::DeviceMemory &dm)
+  int RankSearch::parse_kmer_string_par(epic::gpu::DeviceMemory &dm)
   {
     auto start = START_TIME;
 
@@ -233,7 +188,7 @@ namespace epic
     return 0;
   }
 
-  int KmerSearch::parse_kmer_string(epic::gpu::DeviceMemory &dm)
+  int RankSearch::parse_kmer_string(epic::gpu::DeviceMemory &dm)
   {
     auto start = START_TIME;
     // We assume that the target machine is little-endian.
@@ -264,7 +219,7 @@ namespace epic
     return 0;
   }
 
-  int KmerSearch::parse_kmer_string_in_gpu(epic::gpu::DeviceMemory &dm)
+  int RankSearch::parse_kmer_string_in_gpu(epic::gpu::DeviceMemory &dm)
   {
     BENCHMARK_CODE(cudaStreamSynchronize(dm.device_stream.stream);) // This synchronization is needed here only for benchmarking the following memcpy. This can be removed.
     dm.device_stream.start_timer();
@@ -289,7 +244,7 @@ namespace epic
     return 0;
   }
 
-  int KmerSearch::add_paddings()
+  int RankSearch::add_paddings()
   {
     number_of_letters_padded = epic::utils::round_up_first_to_multiple_of_second<u64>((number_of_letters + 32ULL), 32ULL);
     for (u64 i = number_of_letters; i < number_of_letters_padded; i++)
@@ -300,7 +255,7 @@ namespace epic
     return 0;
   }
 
-  inline int KmerSearch::allocate_memory()
+  inline int RankSearch::allocate_memory()
   {
     try
     {
@@ -316,7 +271,7 @@ namespace epic
     return 0;
   }
 
-  inline int KmerSearch::read_file(std::ifstream &fs, std::size_t pos = 0)
+  inline int RankSearch::read_file(std::ifstream &fs, std::size_t pos = 0)
   {
     auto start = START_TIME;
     fs.seekg(pos, std::ios::beg);
@@ -341,7 +296,7 @@ namespace epic
     return 0;
   }
 
-  inline int KmerSearch::read_file_at_once(std::ifstream &fs, std::size_t pos = 0)
+  inline int RankSearch::read_file_at_once(std::ifstream &fs, std::size_t pos = 0)
   {
     auto start = START_TIME;
     fs.seekg(pos, std::ios::beg);
@@ -357,7 +312,7 @@ namespace epic
     return 1;
   }
 
-  inline int KmerSearch::read_file_at_once_concurrently()
+  inline int RankSearch::read_file_at_once_concurrently()
   {
     auto start = START_TIME;
     u64 number_of_parallel_file_reads = 4ULL;
@@ -412,7 +367,7 @@ namespace epic
   }
 
   inline int
-  KmerSearch::read_size(std::ifstream &fs)
+  RankSearch::read_size(std::ifstream &fs)
   {
     size_of_file = fs.tellg();
     if (size_of_file == 0)
@@ -424,7 +379,7 @@ namespace epic
     return 0;
   }
 
-  bool KmerSearch::test_kmer_string(epic::gpu::DeviceMemory &dm)
+  bool RankSearch::test_kmer_string(epic::gpu::DeviceMemory &dm)
   {
     u8 bits[256];
     bits['a'] = bits['A'] = 0U;
@@ -460,7 +415,7 @@ namespace epic
     return success;
   }
 
-  void KmerSearch::print_performance_info()
+  void RankSearch::print_performance_info()
   {
     fprintf(stderr, "Opening the file %s succeeded.\n", filename.c_str());
     fprintf(stderr, "Number of bytes in file: %zu \n", size_of_file);
@@ -477,3 +432,4 @@ namespace epic
     fprintf(stderr, "Number of positions %" PRIu64 "\n", number_of_positions);
   }
 }
+*/

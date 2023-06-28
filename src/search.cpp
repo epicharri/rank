@@ -1,10 +1,7 @@
-//#include "../include/search.hpp"
+// #include "../include/search.hpp"
 #include "../include/globals.hpp"
-#include "../include/gpu/device_memory.hpp"
-#include "../include/matrix_sbwt.hpp"
 #include "../include/parameters.hpp"
-
-#include "../include/epicseq/kmer_search.hpp"
+#include "../include/rank_search.hpp"
 
 int main(int argc, char **argv)
 {
@@ -13,14 +10,12 @@ int main(int argc, char **argv)
   epic::Parameters parameters;
   if (parameters.read_arguments(argc, argv, prop))
     return 0;
-  epic::gpu::DeviceMemory dm;
-  epic::MatrixSBWT sbwt;
-  if (sbwt.create(dm, parameters, DEVICE_IS_NVIDIA_A100))
+  RankSearch searcher(parameters, DEVICE_IS_NVIDIA_A100);
+  if (searcher.create())
     return 0;
-  fprintf(stderr, "%f ms for reading the bit vector files, constructing the rank data structures, and sending to the device.\n", sbwt.millis_before_presearch);
 
-  epic::KmerSearch searcher(parameters.fileQueries, parameters);
-  if (searcher.search(dm))
+  if (searcher.search())
     return 0;
+
   return 0;
 }
