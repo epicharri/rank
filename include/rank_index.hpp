@@ -30,7 +30,7 @@ struct RankIndex
   template <u32 words_in_basicblock>
   u64 popcount_basicblock(u64 *, u64);
 
-  int construct(HostArray &, u64);
+  int construct(HostArray &);
   int compute_index(HostArray &, u64);
 
   RankIndex() = default;

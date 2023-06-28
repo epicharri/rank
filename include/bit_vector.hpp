@@ -111,7 +111,7 @@ int BitVector::fill_bit_vector_with_one_bits()
 
 int BitVector::allocate_memory_for_data()
 {
-  if (host_data.create(number_of_words_padded * 8ULL))
+  if (host_data.create(number_of_words_padded * 8ULL, epic::kind::not_write_only))
     return 1;
   if (device_data.create(number_of_words_padded * 8ULL))
     return 1;
@@ -120,7 +120,7 @@ int BitVector::allocate_memory_for_data()
 
 inline void BitVector::calculate_hyperblock_size()
 {
-  u64 log_2_of_hyperblock_size = (if (bits_in_superblock == 4096)) ? 31 : 32;
+  u64 log_2_of_hyperblock_size = (bits_in_superblock == 4096) ? 31 : 32;
 
   number_of_words_in_one_hyperblock_in_host = (1ULL << log_2_of_hyperblock_size) / 64ULL;
   if (number_of_words_padded < number_of_words_in_one_hyperblock_in_host)
