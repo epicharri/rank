@@ -1,6 +1,7 @@
 #pragma once
 #include "../include/globals.hpp"
 #include "../include/gpu/cuda.hpp"
+#include "../include/gpu/device_stream.hpp"
 
 struct DeviceArray
 {

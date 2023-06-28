@@ -6,7 +6,7 @@ struct HostArray
 {
   u64 *data = nullptr;
   u64 size_in_bytes = 0ULL;
-  int create(u64, bool, epic::gpu::DeviceStream &);
+  int create(u64, bool);
   HostArray() = default;
   ~HostArray();
 };

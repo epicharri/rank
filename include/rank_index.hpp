@@ -3,6 +3,7 @@
 #include "../include/enums.hpp"
 #include "../include/globals.hpp"
 #include "../include/gpu/cuda.hpp"
+#include "../include/gpu/device_stream.hpp"
 #include "../include/host_array.hpp"
 
 struct RankIndex
