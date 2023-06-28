@@ -1,10 +1,10 @@
 #pragma once
-#include "../globals.hpp"
-#include "../gpu/cuda.hpp"
-#include "../gpu/device_memory.hpp"
-#include "../gpu/device_stream.hpp"
-#include "../parameters.hpp"
-#include "../utils/helpers.hpp"
+#include "../include/globals.hpp"
+#include "../include/gpu/cuda.hpp"
+#include "../include/gpu/device_memory.hpp"
+#include "../include/gpu/device_stream.hpp"
+#include "../include/parameters.hpp"
+#include "../include/utils/helpers.hpp"
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
