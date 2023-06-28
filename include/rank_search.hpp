@@ -42,6 +42,7 @@ RankSearch::~RankSearch()
 int RankSearch::create()
 {
   device_stream.start_timer();
+  DEBUG_CODE(fprintf(stderr, "device_stream timer started\n");)
   auto start = START_TIME;
   int created = bit_vector.create(parameters, device_stream);
   int constructed = bit_vector.construct(device_stream);
