@@ -1,1 +1,1 @@
-# SBWT membership queries
+# Rank function in GPU
