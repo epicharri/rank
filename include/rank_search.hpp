@@ -1,8 +1,10 @@
 #pragma once
 #include "../include/bit_vector.hpp"
+#include "../include/device_array.hpp"
 #include "../include/globals.hpp"
 #include "../include/gpu/cuda.hpp"
 #include "../include/gpu/device_stream.hpp"
+#include "../include/host_array.hpp"
 #include "../include/parameters.hpp"
 #include "../include/utils/helpers.hpp"
 #include <cstdint>
@@ -52,11 +54,11 @@ int RankSearch::create()
 
   u64 number_of_positions = parameters.query_positions_count;
 
+  device_stream.start_timer();
+  auto start_create_positions = START_TIME;
   host_positions_in_and_results_out.create(number_of_positions * sizeof(u64), epic::kind::not_write_only); // This will be written and read.
   device_positions_in_and_results_out.create(number_of_positions * sizeof(u64), device_stream);
 
-  device_stream.start_timer();
-  auto start_create_positions = START_TIME;
   if (create_random_positions())
   {
     DEBUG_CODE(fprintf(stderr, "Creating random positions did not succeed.\n");)
@@ -87,7 +89,6 @@ int RankSearch::create_random_positions()
   u64 batch_size_in_bytes = 1ULL << 30; // 2**30 B = 1 GB
   u64 batch_size_in_words = batch_size_in_bytes / sizeof(u64);
   u64 last_batch_number = number_of_positions / batch_size_in_words;
-  u64 last_batch_size_in_bytes = number_of_positions - last_batch_number * batch_size_in_words;
 
   if (number_of_positions < batch_size_in_words)
   {
