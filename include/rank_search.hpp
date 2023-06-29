@@ -42,7 +42,7 @@ int RankSearch::search()
   fprintf(stderr, "Starting the search.\n");
   u64 number_of_positions = parameters.query_positions_count;
   float millis = call_rank_search(parameters, device_stream, bit_vector, bit_vector.rank_index, device_positions_in_and_results_out, number_of_positions, device_is_nvidia_a100);
-  return 0;
+  epic::gpu::get_and_print_last_error();
   fprintf(stderr, "Search took %f ms.\n");
   float nanos_per_query = (((double)millis) * 1000000) / ((double)number_of_positions);
   fprintf(stderr, "Search per query %f ns.\n", nanos_per_query);
