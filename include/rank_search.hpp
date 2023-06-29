@@ -39,6 +39,7 @@ RankSearch::~RankSearch()
 
 int RankSearch::search()
 {
+  fprintf(stderr, "Starting the search.\n");
   u64 number_of_positions = parameters.query_positions_count;
   float millis = call_rank_search(parameters, device_stream, bit_vector, bit_vector.rank_index, device_positions_in_and_results_out, number_of_positions, device_is_nvidia_a100);
   return 0;
