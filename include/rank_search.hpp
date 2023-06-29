@@ -46,6 +46,7 @@ int RankSearch::search()
   fprintf(stderr, "Search took %f ms.\n");
   float nanos_per_query = (((double)millis) * 1000000) / ((double)number_of_positions);
   fprintf(stderr, "Search per query %f ns.\n", nanos_per_query);
+  return 0;
 }
 
 int RankSearch::create()
