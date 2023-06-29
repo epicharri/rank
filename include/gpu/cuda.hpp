@@ -78,6 +78,7 @@ namespace epic
     {
       if (err != cudaSuccess)
       {
+        fprintf(stderr, "CUDA error %d (%s)\n", err, cudaGetErrorString(err));
         return 1;
       }
       return 0;
