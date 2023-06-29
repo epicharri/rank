@@ -20,11 +20,11 @@ public:
   epic::gpu::DeviceStream device_stream;
   BitVector bit_vector;
   HostArray host_positions_in_and_results_out;
-  DeviceArray host_positions_in_and_results_out;
+  DeviceArray device_positions_in_and_results_out;
   bool device_is_nvidia_a100 = true;
   int create();
   int search();
-  inline u64 give_random_position(u64);
+  inline u64 give_random_position(u64, u64);
   int create_random_positions();
   RankSearch() = default;
   ~RankSearch();
@@ -52,14 +52,14 @@ int RankSearch::create()
 
   u64 number_of_positions = parameters.query_positions_count;
 
-  host_positions_in_and_results_out.create(number_of_positions * sizeof(u64), epic::kind::write_only); // Here, write_only means that the array is not to be read, only written. This enhances the performance of writing and the transfer between host and device, but reading in host is slow. This may increase the checking the results greatly.
+  host_positions_in_and_results_out.create(number_of_positions * sizeof(u64), epic::kind::not_write_only); // This will be written and read.
   device_positions_in_and_results_out.create(number_of_positions * sizeof(u64), device_stream);
 
   device_stream.start_timer();
   auto start_create_positions = START_TIME;
   if (create_random_positions())
   {
-    DEBUG_CODE(fprintf("Creating random positions did not succeed.\n");)
+    DEBUG_CODE(fprintf(stderr, "Creating random positions did not succeed.\n");)
     return 1;
   }
   device_stream.stop_timer();
@@ -73,7 +73,7 @@ int RankSearch::create()
   return 0;
 }
 
-inline u64 give_random_position(u64 number_of_positions, u64 position_index)
+inline u64 RankSearch::give_random_position(u64 number_of_positions, u64 position_index)
 {
   u64 ls_31_bits = (u64)random();
   u64 ms_bits = ((u64)random()) << 31;
