@@ -194,53 +194,6 @@ namespace epic
             {
                 query_positions_count = std::stoull(parameter.substr(24, parameter.length()));
             }
-            /*
-            if (std::regex_match(parameter, Options.k_regex))
-            {
-                k = (u32)std::stoi(parameter.substr(4, 2));
-                continue;
-            }
-            if (std::regex_match(parameter, Options.k_presearch_regex))
-            {
-                k_presearch = (u32)std::stoi(parameter.substr(14, 2));
-                continue;
-            }
-            if (std::regex_match(parameter, Options.filename_a_regex))
-            {
-                filename_A = parameter.substr(9, std::string::npos);
-                continue;
-            }
-            if (std::regex_match(parameter, Options.filename_c_regex))
-            {
-                filename_C = parameter.substr(9, std::string::npos);
-                continue;
-            }
-            if (std::regex_match(parameter, Options.filename_g_regex))
-            {
-                filename_G = parameter.substr(9, std::string::npos);
-                continue;
-            }
-            if (std::regex_match(parameter, Options.filename_t_regex))
-            {
-                filename_T = parameter.substr(9, std::string::npos);
-                continue;
-            }
-            if (std::regex_match(parameter, Options.filename_queries_regex))
-            {
-                fileQueries = parameter.substr(15, std::string::npos);
-                continue;
-            }
-            if (std::regex_match(parameter, Options.filename_answers_regex))
-            {
-                fileAnswers = parameter.substr(15, std::string::npos);
-                continue;
-            }
-            if (std::regex_match(parameter, Options.use_unified_memory_for_queries_regex))
-            {
-                use_unified_memory_for_queries = true;
-                continue;
-            }
-            */
             if (std::regex_match(parameter, Options.threads_per_block_regex))
             {
                 u32 par_threads_per_block = (u32)std::stoi(parameter.substr(20, 4));

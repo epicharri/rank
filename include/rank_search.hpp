@@ -50,9 +50,10 @@ int RankSearch::create()
     return 1;
   auto stop = STOP_TIME;
   float millis = DURATION_IN_MILLISECONDS(start, stop);
-  BENCHMARK_CODE(fprintf(stderr, "GPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis_stream);)
+  BENCHMARK_CODE(
 
-  BENCHMARK_CODE(fprintf(stderr, "CPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis);)
+      fprintf(stderr, "GPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis_stream);
+      fprintf(stderr, "CPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU, including destruction of the host array of the bit vector takes %f ms.\n", millis);)
 
   u64 number_of_positions = parameters.query_positions_count;
 
@@ -60,6 +61,15 @@ int RankSearch::create()
   auto start_create_positions = START_TIME;
   host_positions_in_and_results_out.create(number_of_positions * sizeof(u64), epic::kind::not_write_only); // This will be written and read.
   device_positions_in_and_results_out.create(number_of_positions * sizeof(u64), device_stream);
+
+  BENCHMARK_CODE(
+      fprintf(stderr, "Number of bits in the bitvector is %" PRIu64 "\n", parameter.number_of_bits);
+      fprintf(stderr, "Size of the bit vector data array is %" PRIu64 " bytes.\n", bit_vector.device_data.size_in_bytes);
+
+      fprintf(stderr, "Number of positions is %" PRIu64 "\n", number_of_positions);
+      fprintf(stderr, "Size of the positions array is %" PRIu64 " bytes\n", host_positions_in_and_results_out.size_in_bytes);
+
+  )
 
   if (create_random_positions())
   {
