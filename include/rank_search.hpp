@@ -92,9 +92,8 @@ int RankSearch::create_random_positions()
 
   if (number_of_positions < batch_size_in_words)
   {
-    batch_size_in_words = number_of_positions - 2ULL;
+    batch_size_in_words = number_of_positions;
     batch_size_in_bytes = batch_size_in_words * sizeof(u64);
-    last_batch_size_in_bytes = number_of_positions * sizeof(u64);
     last_batch_number = 0ULL;
   }
 
@@ -108,7 +107,7 @@ int RankSearch::create_random_positions()
       position_index = batch_number * batch_size_in_words + j;
       host_positions_in_and_results_out.data[position_index] = give_random_position(number_of_positions, position_index);
     }
-    if (cudaMemcpyAsync(device_positions_in_and_results_out.data + batch_number * batch_size_in_words, host_positions_in_and_results_out + batch_number * batch_size_in_words, batch_size_in_bytes, device_stream.stream))
+    if (cudaMemcpyAsync(&device_positions_in_and_results_out.data + batch_number * batch_size_in_words, host_positions_in_and_results_out.data + batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
       return 1;
     batch_number += 1ULL;
   }
@@ -119,9 +118,8 @@ int RankSearch::create_random_positions()
     host_positions_in_and_results_out.data[position_index] = give_random_position(number_of_positions, position_index);
   }
   batch_size_in_bytes = (number_of_positions - last_batch_number * batch_size_in_words) * sizeof(u64);
-  if (cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in_and_results_out + last_batch_number * batch_size_in_words, batch_size_in_bytes, device_stream.stream))
+  if (cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
     return 1;
-  batch_number += 1ULL;
   return 0;
 }
 
