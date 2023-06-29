@@ -26,13 +26,14 @@ namespace epic
         u64 number_of_positions)
     {
       device_stream.start_timer();
-      CHECK_WITHOUT_RETURN(epic::gpu::rank_search<superblock_size, shuffles, rank_version><<<dim3(grid_size), dim3(block_size), 0, device_stream.stream>>>(
-                               bit_vector.device_data.data,
-                               rank_index.device_layer_0.data,
-                               rank_index.device_layer_12.data,
-                               positions_in_and_results_out.data,
-                               number_of_positions);)
+      cudaError_t err = epic::gpu::rank_search<superblock_size, shuffles, rank_version><<<dim3(grid_size), dim3(block_size), 0, device_stream.stream>>>(
+          bit_vector.device_data.data,
+          rank_index.device_layer_0.data,
+          rank_index.device_layer_12.data,
+          positions_in_and_results_out.data,
+          number_of_positions);
       device_stream.stop_timer();
+      epic::gpu::print_device_error(err, "rank_search<>()");
       return device_stream.duration_in_millis();
     }
   }
