@@ -103,7 +103,7 @@ int BitVector::fill_bit_vector_with_random_bits()
   }
   for (u64 j = 0ULL; j < number_of_words; j += 1ULL)
   {
-    data[j] = (((u64)random()) << 32) | ((u64)random());
+    host_data.data[j] = (((u64)random()) << 32) | ((u64)random());
   }
   u32 number_of_msb_in_last_word = (u32)(number_of_bits & 63ULL);
   u64 mask = 0xffff'ffff'ffff'ffff;
