@@ -17,7 +17,6 @@ struct BitVector
   HostArray host_data;
   DeviceArray device_data;
   RankIndex rank_index;
-  epic::Parameters parameters;
   u64 number_of_bits = 0ULL;
   u64 number_of_words = 0ULL;
   u64 number_of_words_padded = 0ULL;
@@ -27,6 +26,7 @@ struct BitVector
   u64 number_of_words_in_one_hyperblock_in_host = 0ULL;
   int destruct_host_data();
   int fill_bit_vector_with_one_bits();
+  int fill_bit_vector_with_random_bits();
   void calculate_number_of_words();
   void calculate_number_of_words_padded();
   void calculate_hyperblock_size();
@@ -71,7 +71,11 @@ int BitVector::create(epic::Parameters &parameters, epic::gpu::DeviceStream &dev
 int BitVector::construct(epic::gpu::DeviceStream &device_stream)
 {
   auto start = START_TIME;
-  fill_bit_vector_with_one_bits();
+  if (bit_vector_content == epic::kind::one_zero_and_then_all_ones_bit_vector)
+    fill_bit_vector_with_one_bits();
+  else if (bit_vector_content == epic::kind::random_bit_vector)
+    fill_bit_vector_with_random_bits();
+
   auto stop = STOP_TIME;
   float millis = DURATION_IN_MILLISECONDS(start, stop);
   BENCHMARK_CODE(fprintf(stderr, "Creating the bit vector takes %f ms\n", millis);)
@@ -89,6 +93,34 @@ int BitVector::construct(epic::gpu::DeviceStream &device_stream)
   return 0;
 }
 
+// Filled with 32-bit signed positive integers. Thus, every 32nd bit is 0.
+int BitVector::fill_bit_vector_with_random_bits()
+{
+  srandom(1);
+  for (u64 i = number_of_words - 1ULL; i < number_of_words_padded; i += 1ULL)
+  {
+    host_data.data[i] = 0ULL;
+  }
+  for (u64 j = 0ULL; j < number_of_words; j += 1ULL)
+  {
+    data[j] = (((u64)random()) << 32) | ((u64)random());
+  }
+  u32 number_of_msb_in_last_word = (u32)(number_of_bits & 63ULL);
+  u64 mask = 0xffff'ffff'ffff'ffff;
+  if (number_of_msb_in_last_word == 0U)
+  {
+    mask = 0ULL;
+  }
+  else
+  {
+    mask = mask << (64U - number_of_msb_in_last_word);
+  }
+  host_data.data[number_of_words - 1ULL] &= mask;
+
+  return 0;
+}
+
+// First bit is 0, other bits are ones.
 int BitVector::fill_bit_vector_with_one_bits()
 {
 
@@ -96,6 +128,7 @@ int BitVector::fill_bit_vector_with_one_bits()
   {
     host_data.data[i] = 0ULL;
   }
+  host_data.data[0] = 0x7fff'ffff'ffff'ffffULL;
   for (u64 i = 0ULL; i < number_of_words - 1ULL; i += 1ULL)
   {
     host_data.data[i] = 0xffff'ffff'ffff'ffffULL;
