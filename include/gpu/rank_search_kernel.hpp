@@ -22,7 +22,8 @@ namespace epic
       u32 idx = blockIdx.x * blockDim.x + threadIdx.x;
       if (idx < number_of_positions)
       {
-        positions_in_and_results_out[idx] = epic::gpu::rank<superblock_size, shuffles, rank_version>(bit_vector, L0, L12, positions_in_and_results_out[idx]);
+        u64 position = positions_in_and_results_out[idx];
+        positions_in_and_results_out[idx] = epic::gpu::rank<superblock_size, shuffles, rank_version>(bit_vector, L0, L12, position);
       }
     }
   }
