@@ -1,5 +1,6 @@
 #pragma once
 #include "../include/bit_vector.hpp"
+#include "../include/call_rank_search.hpp"
 #include "../include/device_array.hpp"
 #include "../include/globals.hpp"
 #include "../include/gpu/cuda.hpp"
@@ -34,6 +35,15 @@ public:
 
 RankSearch::~RankSearch()
 {
+}
+
+int RankSearch::search()
+{
+  u64 number_of_positions = parameters.query_positions_count;
+  float millis = call_rank_search(parameters, device_stream, bit_vector, rank_index, positions_in_and_results_out, number_of_positions, device_is_nvidia_a100) return 0;
+  fprintf(stderr, "Search took %f ms.\n");
+  float nanos_per_query = (((double)millis) * 1000000) / ((double)number_of_positions);
+  fprintf(stderr, "Search per query %f ns.\n", nanos_per_query);
 }
 
 int RankSearch::create()
@@ -131,11 +141,5 @@ int RankSearch::create_random_positions()
   batch_size_in_bytes = (number_of_positions - last_batch_number * batch_size_in_words) * sizeof(u64);
   CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
 
-  return 0;
-}
-
-int RankSearch::search()
-{
-  fprintf(stderr, "RankSearch::search() called.\n");
   return 0;
 }
