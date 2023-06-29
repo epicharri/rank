@@ -46,6 +46,7 @@ int RankSearch::create()
   int constructed = bit_vector.construct(device_stream);
   device_stream.stop_timer();
   float millis_stream = device_stream.duration_in_millis(); // This synchronizes the stream, i.e. blocks CPU until ready.
+  bit_vector.destruct_host_data();
   auto stop = STOP_TIME;
   float millis = DURATION_IN_MILLISECONDS(start, stop);
   BENCHMARK_CODE(fprintf(stderr, "GPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis_stream);)
@@ -70,7 +71,7 @@ int RankSearch::create()
   float millis_create_positions = DURATION_IN_MILLISECONDS(start_create_positions, stop_create_positions);
   BENCHMARK_CODE(fprintf(stderr, "GPU-timer: Creating the random positions and transfer to GPU takes %f ms.\n", millis_stream_create_positions);)
 
-  BENCHMARK_CODE(fprintf(stderr, "CPU-timer: Creating the bit vector and transfer to GPU takes %f ms.\n", millis_create_positions);)
+  BENCHMARK_CODE(fprintf(stderr, "CPU-timer: Creating the random positions and transfer to GPU takes %f ms.\n", millis_create_positions);)
 
   return 0;
 }
@@ -107,8 +108,7 @@ int RankSearch::create_random_positions()
       position_index = batch_number * batch_size_in_words + j;
       host_positions_in_and_results_out.data[position_index] = give_random_position(number_of_positions, position_index);
     }
-    if (cudaMemcpyAsync(&device_positions_in_and_results_out.data + batch_number * batch_size_in_words, host_positions_in_and_results_out.data + batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
-      return 1;
+    CHECK(cudaMemcpyAsync(&device_positions_in_and_results_out.data + batch_number * batch_size_in_words, host_positions_in_and_results_out.data + batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
     batch_number += 1ULL;
   }
 
@@ -118,8 +118,8 @@ int RankSearch::create_random_positions()
     host_positions_in_and_results_out.data[position_index] = give_random_position(number_of_positions, position_index);
   }
   batch_size_in_bytes = (number_of_positions - last_batch_number * batch_size_in_words) * sizeof(u64);
-  if (cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
-    return 1;
+  CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
+
   return 0;
 }
 

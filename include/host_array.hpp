@@ -7,6 +7,7 @@ struct HostArray
   u64 *data = nullptr;
   u64 size_in_bytes = 0ULL;
   int create(u64, bool);
+  int destruct();
   HostArray() = default;
   ~HostArray();
 };
@@ -16,6 +17,15 @@ HostArray::~HostArray()
   if (data)
   {
     CHECK_WITHOUT_RETURN(cudaFreeHost(data));
+  }
+};
+
+int HostArray::destruct()
+{
+  if (data)
+  {
+    CHECK_WITHOUT_RETURN(cudaFreeHost(data));
+    DEBUG_CODE(fprintf(stderr, "HostArray data %" PRIu64 " bytes freed.\n", size_in_bytes);)
   }
 };
 
