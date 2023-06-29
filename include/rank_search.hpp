@@ -63,7 +63,7 @@ int RankSearch::create()
   device_positions_in_and_results_out.create(number_of_positions * sizeof(u64), device_stream);
 
   BENCHMARK_CODE(
-      fprintf(stderr, "Number of bits in the bitvector is %" PRIu64 "\n", parameter.number_of_bits);
+      fprintf(stderr, "Number of bits in the bitvector is %" PRIu64 "\n", parameters.number_of_bits);
       fprintf(stderr, "Size of the bit vector data array is %" PRIu64 " bytes.\n", bit_vector.device_data.size_in_bytes);
 
       fprintf(stderr, "Number of positions is %" PRIu64 "\n", number_of_positions);
