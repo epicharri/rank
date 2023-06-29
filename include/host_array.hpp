@@ -27,6 +27,7 @@ int HostArray::destruct()
     CHECK_WITHOUT_RETURN(cudaFreeHost(data));
     DEBUG_CODE(fprintf(stderr, "HostArray data %" PRIu64 " bytes freed.\n", size_in_bytes);)
   }
+  return 0;
 };
 
 int HostArray::create(u64 the_size_in_bytes, bool write_only)

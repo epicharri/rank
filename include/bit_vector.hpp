@@ -25,7 +25,7 @@ struct BitVector
   int bit_vector_content = epic::kind::one_zero_and_then_all_ones_bit_vector;
   u32 bits_in_superblock = 0U;
   u64 number_of_words_in_one_hyperblock_in_host = 0ULL;
-  void destruct_host_data();
+  int destruct_host_data();
   int fill_bit_vector_with_one_bits();
   void calculate_number_of_words();
   void calculate_number_of_words_padded();
@@ -39,9 +39,9 @@ struct BitVector
 
 BitVector::~BitVector(){};
 
-void BitVector::destruct_host_data()
+int BitVector::destruct_host_data()
 {
-  host_data.destruct();
+  return host_data.destruct();
 }
 
 int BitVector::create(epic::Parameters &parameters, epic::gpu::DeviceStream &device_stream)

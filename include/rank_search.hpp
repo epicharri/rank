@@ -46,7 +46,8 @@ int RankSearch::create()
   int constructed = bit_vector.construct(device_stream);
   device_stream.stop_timer();
   float millis_stream = device_stream.duration_in_millis(); // This synchronizes the stream, i.e. blocks CPU until ready.
-  bit_vector.destruct_host_data();
+  if (bit_vector.destruct_host_data())
+    return 1;
   auto stop = STOP_TIME;
   float millis = DURATION_IN_MILLISECONDS(start, stop);
   BENCHMARK_CODE(fprintf(stderr, "GPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis_stream);)
