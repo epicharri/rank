@@ -129,7 +129,7 @@ int BitVector::fill_bit_vector_with_one_bits()
     host_data.data[i] = 0ULL;
   }
   host_data.data[0] = 0x7fff'ffff'ffff'ffffULL;
-  for (u64 i = 0ULL; i < number_of_words - 1ULL; i += 1ULL)
+  for (u64 i = 1ULL; i < number_of_words - 1ULL; i += 1ULL)
   {
     host_data.data[i] = 0xffff'ffff'ffff'ffffULL;
   }

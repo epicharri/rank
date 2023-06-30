@@ -15,5 +15,10 @@ int main(int argc, char **argv)
   if (searcher.search())
     return 0;
 
+  if (searcher.fetch_results())
+    return 0;
+  if (searcher.print_results(100000))
+    return 0;
+
   return 0;
 }

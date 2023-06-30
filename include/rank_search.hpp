@@ -25,6 +25,9 @@ public:
   HostArray host_positions_in_and_results_out;
   DeviceArray device_positions_in_and_results_out;
   bool device_is_nvidia_a100 = true;
+  int print_results(u64);
+  int fetch_results();
+  int check();
   int create();
   int search();
   inline u64 give_random_position(u64, u64);
@@ -35,6 +38,26 @@ public:
 
 RankSearch::~RankSearch()
 {
+}
+
+int RankSearch::fetch_results()
+{
+  CHECK_WITHOUT_RETURN(cudaMemcpy(host_positions_in_and_results_out.data, device_positions_in_and_results_out.data, host_positions_in_and_results_out.size_in_bytes, cudaMemcpyDeviceToHost););
+  return 0;
+}
+
+int RankSearch::print_results(u64 count)
+{
+  for (u64 i = 0ULL; i < parameters.query_positions_count && i < count; i += 1ULL)
+  {
+    fprintf(stdout, "%" PRIu64 " ");
+  }
+  return 0;
+}
+
+int RankSearch::check()
+{
+  return 0;
 }
 
 int RankSearch::search()
