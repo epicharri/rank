@@ -50,7 +50,7 @@ int RankSearch::print_results(u64 count)
 {
   for (u64 i = 0ULL; i < parameters.query_positions_count && i < count; i += 1ULL)
   {
-    fprintf(stdout, "%" PRIu64 " ");
+    fprintf(stdout, "%" PRIu64 " ", host_positions_in_and_results_out.data[i]);
   }
   return 0;
 }
