@@ -22,6 +22,8 @@ namespace epic
       grid_size = 1ULL;
     int rank_version = parameters.rank_structure_version;
 
+    fprintf(stderr, "In call_rank_search.hpp: parameters.bits_in_superblock = %" PRIu64 "\n", parameters.bits_in_bit_vector);
+
     switch (parameters.bits_in_superblock)
     {
     case 256:
@@ -91,6 +93,7 @@ namespace epic
 
       break;
     }
+    printf("Return 0.0\n");
     return 0.0;
   }
 
