@@ -22,15 +22,17 @@ public:
   epic::Parameters parameters;
   epic::gpu::DeviceStream device_stream;
   BitVector bit_vector;
-  HostArray host_positions_in_and_results_out;
+  HostArray host_positions_in;
+  HostArray host_results_out;
   DeviceArray device_positions_in_and_results_out;
+  u64 number_of_positions = 0ULL;
   bool device_is_nvidia_a100 = true;
   int print_results(u64);
   int fetch_results();
   int check();
   int create();
   int search();
-  inline u64 give_random_position(u64, u64);
+  inline u64 give_random_position(u64);
   int create_random_positions();
   RankSearch() = default;
   ~RankSearch();
@@ -42,34 +44,61 @@ RankSearch::~RankSearch()
 
 int RankSearch::fetch_results()
 {
-  cudaMemcpy(host_positions_in_and_results_out.data, device_positions_in_and_results_out.data, host_positions_in_and_results_out.size_in_bytes, cudaMemcpyDeviceToHost);
+  cudaMemcpy(host_positions_out.data, device_positions_in_and_results_out.data, host_positions_out.size_in_bytes, cudaMemcpyDeviceToHost);
+  epic::gpu::get_and_print_last_error("After cudaMemcpy in rank_search.hpp fetch_results() ");
   return 0;
 }
 
 int RankSearch::print_results(u64 count)
 {
-  for (u64 i = 0ULL; i < parameters.query_positions_count && i < count; i += 1ULL)
+  for (u64 i = 0ULL; i < number_of_positions && i < count; i += 1ULL)
   {
-    fprintf(stdout, "%" PRIu64 " ", host_positions_in_and_results_out.data[i]);
+    fprintf(stdout, "%" PRIu64 " ", host_positions_out.data[i]);
   }
   return 0;
 }
 
 int RankSearch::check()
 {
+  if (parameters.bit_vector_data_type == epic::kind::one_zero_and_then_all_ones_bit_vector)
+  {
+    u64 number_of_errors = 0ULL;
+    u64 position;
+    for (u64 i = 0ULL; i < number_of_positions; i += 1ULL)
+    {
+      position = host_positions_in[i]; // rank(0) = 0, rank (1) = 0, rank (2) = 1, rank(3) = 2, ...
+      rank = host_results_out[i];
+      if (position <= 1 && rank != 0)
+        number_of_errors += 1ULL;
+      else if (rank != position - 1ULL)
+        number_of_errors += 1ULL;
+    }
+    if (number_of_errors)
+    {
+      fprintf(stderr, "ERROR!!! Number of errors is %" PRIu64 "\n", number_of_errors);
+      else
+      {
+        fprintf(stderr, "SUCCESS!!! The rank function returns correct values.\n");
+      }
+    }
+  }
+  else
+  {
+    fprintf(stderr, "The checking of the results is only for the bit vector content with one zero and the rest all ones.\n");
+  }
   return 0;
 }
 
 int RankSearch::search()
 {
   fprintf(stderr, "Starting the search.\n");
-  u64 number_of_positions = parameters.query_positions_count;
   float millis = 22222.0;
   millis = call_rank_search(parameters, device_stream, bit_vector, bit_vector.rank_index, device_positions_in_and_results_out, number_of_positions, device_is_nvidia_a100);
-  epic::gpu::get_and_print_last_error();
+
   fprintf(stderr, "Search took %f ms.\n", millis);
   float nanos_per_query = (((double)millis) * 1000000.0) / ((double)number_of_positions);
   fprintf(stderr, "Search per query %f ns.\n", nanos_per_query);
+  epic::gpu::get_and_print_last_error("After calling call_rank_search() in rank_search.hpp ");
   return 0;
 }
 
@@ -92,11 +121,12 @@ int RankSearch::create()
       fprintf(stderr, "GPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis_stream);
       fprintf(stderr, "CPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU, including destruction of the host array of the bit vector takes %f ms.\n", millis);)
 
-  u64 number_of_positions = parameters.query_positions_count;
+  number_of_positions = parameters.query_positions_count;
 
   device_stream.start_timer();
   auto start_create_positions = START_TIME;
-  host_positions_in_and_results_out.create(number_of_positions * sizeof(u64), epic::kind::not_write_only); // This will be written and read.
+  host_positions_in.create(number_of_positions * sizeof(u64), epic::kind::not_write_only);  // This will be written and read.
+  host_positions_out.create(number_of_positions * sizeof(u64), epic::kind::not_write_only); // This will be written and read.
   device_positions_in_and_results_out.create(number_of_positions * sizeof(u64), device_stream);
 
   BENCHMARK_CODE(
@@ -104,7 +134,7 @@ int RankSearch::create()
       fprintf(stderr, "Size of the bit vector data array is %" PRIu64 " bytes.\n", bit_vector.device_data.size_in_bytes);
 
       fprintf(stderr, "Number of positions is %" PRIu64 "\n", number_of_positions);
-      fprintf(stderr, "Size of the positions array is %" PRIu64 " bytes\n", host_positions_in_and_results_out.size_in_bytes);
+      fprintf(stderr, "Size of the positions array is %" PRIu64 " bytes\n", host_positions_in.size_in_bytes);
 
   )
 
@@ -124,7 +154,7 @@ int RankSearch::create()
   return 0;
 }
 
-inline u64 RankSearch::give_random_position(u64 number_of_positions, u64 position_index)
+inline u64 RankSearch::give_random_position(u64 position_index)
 {
   u64 ls_31_bits = (u64)random();
   u64 ms_bits = ((u64)random()) << 31;
@@ -134,7 +164,6 @@ inline u64 RankSearch::give_random_position(u64 number_of_positions, u64 positio
 
 int RankSearch::create_random_positions()
 {
-  u64 number_of_positions = parameters.query_positions_count;
   u64 batch_size_in_bytes = 1ULL << 30; // 2**30 B = 1 GB
   u64 batch_size_in_words = batch_size_in_bytes / sizeof(u64);
   u64 last_batch_number = number_of_positions / batch_size_in_words;
@@ -154,19 +183,19 @@ int RankSearch::create_random_positions()
     for (u64 j = 0ULL; j < batch_size_in_words; j += 1ULL)
     {
       position_index = batch_number * batch_size_in_words + j;
-      host_positions_in_and_results_out.data[position_index] = give_random_position(number_of_positions, position_index);
+      host_positions_in.data[position_index] = give_random_position(position_index);
     }
-    CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + batch_number * batch_size_in_words, host_positions_in_and_results_out.data + batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
+    CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + batch_number * batch_size_in_words, host_positions_in.data + batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
     batch_number += 1ULL;
   }
 
   for (u64 j = last_batch_number * batch_size_in_words; j < number_of_positions; j += 1ULL)
   {
     position_index = j;
-    host_positions_in_and_results_out.data[position_index] = give_random_position(number_of_positions, position_index);
+    host_positions_in.data[position_index] = give_random_position(number_of_positions, position_index);
   }
   batch_size_in_bytes = (number_of_positions - last_batch_number * batch_size_in_words) * sizeof(u64);
-  CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
+  CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in.data + last_batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
 
   return 0;
 }

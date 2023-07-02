@@ -48,10 +48,10 @@ namespace epic
 
   {
     // Helper functions:
-    inline void get_and_print_last_error()
+    inline void get_and_print_last_error(const char *msg)
     {
       cudaError_t err = cudaGetLastError();
-      fprintf(stderr, "Last CUDA error code %d (%s).\n", err, cudaGetErrorString(err));
+      fprintf(stderr, "%s: Last CUDA error code %d (%s).\n", msg, err, cudaGetErrorString(err));
     }
 
     inline void print_device_error(deviceError_t err, const char *msg)

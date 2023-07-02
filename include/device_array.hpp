@@ -18,6 +18,7 @@ DeviceArray::~DeviceArray()
   {
     CHECK_WITHOUT_RETURN(cudaFree(data));
   }
+  DEBUG_CODE(epic::gpu::get_and_print_last_error("After freeing data in device_array.hpp ");)
 }
 
 int DeviceArray::create(u64 the_size_in_bytes, epic::gpu::DeviceStream &device_stream)
