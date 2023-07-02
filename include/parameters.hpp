@@ -70,6 +70,7 @@ namespace epic
         void print_copyright();
         void print_help();
         int read_arguments(int argc, char **argv, cudaDeviceProp &);
+        Parameters() = default;
     };
 
     void Parameters::print_copyright()

@@ -82,12 +82,11 @@ int RankSearch::check()
       fprintf(stderr, "SUCCESS!!! The rank function returns correct values.\n");
     }
   }
-}
-else
-{
-  fprintf(stderr, "The checking of the results is only for the bit vector content with one zero and the rest all ones.\n");
-}
-return 0;
+  else
+  {
+    fprintf(stderr, "The checking of the results is only for the bit vector content with one zero and the rest all ones.\n");
+  }
+  return 0;
 }
 
 int RankSearch::search()
