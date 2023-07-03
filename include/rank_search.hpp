@@ -150,6 +150,7 @@ int RankSearch::create()
       DEBUG_CODE(fprintf(stderr, "Creating random positions did not succeed.\n");)
       return 1;
     }
+    DEBUG_CODE(fprintf(stderr, "Creating random positions: SUCCESS.\n");)
   }
   if (parameters.positions_type == epic::kind::sequential_positions)
   {
@@ -158,6 +159,7 @@ int RankSearch::create()
       DEBUG_CODE(fprintf(stderr, "Creating sequential positions did not succeed.\n");)
       return 1;
     }
+    DEBUG_CODE(fprintf(stderr, "Creating sequential positions: SUCCESS.\n");)
   }
   device_stream.stop_timer();
   float millis_stream_create_positions = device_stream.duration_in_millis(); // This synchronizes the stream, i.e. blocks CPU until ready.
@@ -178,7 +180,7 @@ int RankSearch::create_sequential_positions(u64 start)
     position = start + j;
     host_positions_in.data[j] = position;
   }
-  CHECK(cudaMemcpy(device_positions_in_and_results_out.data, host_positions_in.data, host_positions_in.size_in_bytes, cudaMemcpyHostToDevice))
+  CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data, host_positions_in.data, host_positions_in.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
   return 0;
 }
 
