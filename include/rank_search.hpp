@@ -84,16 +84,19 @@ int RankSearch::check()
           first_error_position = 0ULL;
           first_error_rank = rank;
           first_error_index = 0ULL;
+          first_error_not_found = false;
         }
       }
       else
       {
         err = (u64)(rank != (position - 1ULL));
+        number_of_errors += err;
         if (err && first_error_not_found)
         {
           first_error_position = position;
           first_error_rank = rank;
           first_error_index = i;
+          first_error_not_found = false;
         }
       }
     }
