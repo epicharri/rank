@@ -179,6 +179,8 @@ int RankSearch::create()
   }
   if (parameters.positions_type == epic::kind::sequential_positions)
   {
+    DEBUG_CODE(fprintf(stderr, "Start position: %" PRIu64 "\n", parameters.start_position);)
+
     if (create_sequential_positions(parameters.start_position))
     {
       DEBUG_CODE(fprintf(stderr, "Creating sequential positions did not succeed.\n");)

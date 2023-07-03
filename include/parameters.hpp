@@ -50,7 +50,7 @@ namespace epic
         u64 bits_in_bit_vector = 0ULL;
         int bit_vector_data_type = epic::kind::one_zero_and_then_all_ones_bit_vector; // Default
         u64 query_positions_count = 0ULL;
-        int start_position = 0ULL;
+        u64 start_position = 0ULL;
         int positions_type = epic::kind::random_positions;
         //        bool with_presearch = true;
         //        bool rank_benchmark = false;
