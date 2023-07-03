@@ -45,7 +45,12 @@ RankSearch::~RankSearch()
 
 int RankSearch::fetch_results()
 {
-  cudaMemcpy(host_results_out.data, device_positions_in_and_results_out.data, host_results_out.size_in_bytes, cudaMemcpyDeviceToHost);
+  float millis = 0.0;
+  device_stream.start_timer();
+  cudaMemcpyAsync(host_results_out.data, device_positions_in_and_results_out.data, host_results_out.size_in_bytes, cudaMemcpyDeviceToHost, device_stream.stream);
+  device_stream.stop_timer();
+  millis = device_stream.duration_in_millis();
+  fprintf(stderr, "Fetch results from device to host: %f ms\n", millis);
   epic::gpu::get_and_print_last_error("After cudaMemcpy in rank_search.hpp fetch_results() ");
   return 0;
 }
@@ -221,6 +226,7 @@ inline u64 RankSearch::give_random_position(u64 position_index)
 
 int RankSearch::create_random_positions()
 {
+  srandom(2);
   u64 position;
   for (u64 j = 0ULL; j < number_of_positions; j += 1ULL)
   {
