@@ -135,11 +135,7 @@ int BitVector::fill_bit_vector_with_one_bits()
   }
   u64 last_word = 0xffff'ffff'ffff'ffffULL;
   u32 number_of_msb_in_last_word = (u32)(number_of_bits & 63ULL);
-  if (number_of_msb_in_last_word == 0U)
-  {
-    last_word = 0ULL;
-  }
-  else
+  if (number_of_msb_in_last_word > 0U) // If 0, then all bits are considered.
   {
     last_word = last_word << (64U - number_of_msb_in_last_word);
   }
