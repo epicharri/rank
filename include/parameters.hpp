@@ -19,7 +19,7 @@ namespace epic
         std::string with_shuffles = "--with-shuffles";
         std::string sequential_positions = "--sequential-positions";
         std::string random_positions = "--random-positions";
-        std::regex start_position{"^--start-position=([0-9]+)$"}; // KESKENERÄINEN!!!!!!!!!!!!!11
+        std::regex start_position{"^--start-position=([0-9]+)$"};
 
         std::regex bits_in_superblock_regex{"^--bits-in-superblock=(256|512|1024|2048|4096)$"};
         std::regex bits_in_bit_vector{"^--bits-in-bit-vector=([0-9]+)$"};
@@ -198,7 +198,7 @@ namespace epic
 
             if (std::regex_match(parameter, Options.start_position))
             {
-                start_position = std::stoull(parameter.substr(15, parameter.length()));
+                start_position = std::stoull(parameter.substr(17, parameter.length()));
             }
 
             if (parameter.compare(Options.random_bit_vector) == 0)
