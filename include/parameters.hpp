@@ -17,6 +17,10 @@ namespace epic
         //        std::string without_presearch = "--without-presearch";
         std::string do_not_store_results = "--do-not-store-results";
         std::string with_shuffles = "--with-shuffles";
+        std::string sequential_positions = "--sequential-positions";
+        std::string random_positions = "--random-positions";
+        std::regex start_position{"^--start-position=([0-9]+)$"}; // KESKENERÄINEN!!!!!!!!!!!!!11
+
         std::regex bits_in_superblock_regex{"^--bits-in-superblock=(256|512|1024|2048|4096)$"};
         std::regex bits_in_bit_vector{"^--bits-in-bit-vector=([0-9]+)$"};
         std::string random_bit_vector = "--random-bit-vector";
@@ -46,7 +50,8 @@ namespace epic
         u64 bits_in_bit_vector = 0ULL;
         int bit_vector_data_type = epic::kind::one_zero_and_then_all_ones_bit_vector; // Default
         u64 query_positions_count = 0ULL;
-
+        int start_position = 0ULL;
+        int positions_type = epic::kind::random_positions;
         //        bool with_presearch = true;
         //        bool rank_benchmark = false;
         u32 bits_in_superblock = 1024U; // Default
@@ -135,6 +140,18 @@ namespace epic
                 continue;
             }
 
+            if (parameter.compare(Options.sequential_positions) == 0)
+            { // == 0 means equality
+                positions_type = epic::kind::sequential_positions;
+                continue;
+            }
+
+            if (parameter.compare(Options.random_positions) == 0)
+            { // == 0 means equality
+                positions_type = epic::kind::random_positions;
+                continue;
+            }
+
             if (std::regex_match(parameter, Options.rank_structure_poppy_regex))
             {
                 rank_structure_version = epic::kind::poppy;
@@ -177,6 +194,11 @@ namespace epic
             if (std::regex_match(parameter, Options.bits_in_bit_vector))
             {
                 bits_in_bit_vector = std::stoull(parameter.substr(21, parameter.length()));
+            }
+
+            if (std::regex_match(parameter, Options.start_position))
+            {
+                start_position = std::stoull(parameter.substr(15, parameter.length()));
             }
 
             if (parameter.compare(Options.random_bit_vector) == 0)
@@ -229,6 +251,8 @@ namespace epic
             version = "flat-poppy";
         */
         fprintf(stderr, "Bits in the bit vector = %" PRIu64 "\n", bits_in_bit_vector);
+        fprintf(stderr, "Start position = %" PRIu64 "\n", start_position);
+        fprintf(stderr, "Number of positions = %" PRIu64 "\n", query_positions_count);
 
         std::string bit_vector_content = "Bit vector content: after one zero, all bits are ones.";
         if (bit_vector_data_type == epic::kind::random_bit_vector)

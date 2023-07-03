@@ -34,6 +34,7 @@ public:
   int search();
   inline u64 give_random_position(u64);
   int create_random_positions();
+  int create_sequential_positions(u64);
   RankSearch() = default;
   ~RankSearch();
 };
@@ -142,10 +143,21 @@ int RankSearch::create()
 
   )
 
-  if (create_random_positions())
+  if (parameters.positions_type == epic::kind::random_positions)
   {
-    DEBUG_CODE(fprintf(stderr, "Creating random positions did not succeed.\n");)
-    return 1;
+    if (create_random_positions())
+    {
+      DEBUG_CODE(fprintf(stderr, "Creating random positions did not succeed.\n");)
+      return 1;
+    }
+  }
+  if (parameters.positions_type == epic::kind::sequential_positions)
+  {
+    if (create_sequential_positions(parameters.start_position))
+    {
+      DEBUG_CODE(fprintf(stderr, "Creating sequential positions did not succeed.\n");)
+      return 1;
+    }
   }
   device_stream.stop_timer();
   float millis_stream_create_positions = device_stream.duration_in_millis(); // This synchronizes the stream, i.e. blocks CPU until ready.
@@ -155,6 +167,18 @@ int RankSearch::create()
 
   BENCHMARK_CODE(fprintf(stderr, "CPU-timer: Creating the random positions and transfer to GPU takes %f ms.\n", millis_create_positions);)
 
+  return 0;
+}
+
+int RankSearch::create_sequential_positions(u64 start)
+{
+  u64 position;
+  for (u64 j = 0ULL; j < number_of_positions; j += 1ULL)
+  {
+    position = start + j;
+    host_positions_in.data[j] = position;
+  }
+  CHECK(cudaMemcpy(device_positions_in_and_results_out.data, host_positions_in.data, host_positions_in.size_in_bytes, cudaMemcpyHostToDevice))
   return 0;
 }
 
@@ -200,6 +224,6 @@ int RankSearch::create_random_positions()
   }
   batch_size_in_bytes = (number_of_positions - last_batch_number * batch_size_in_words) * sizeof(u64);
   CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in.data + last_batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
-
+  cudaStreamSynchronize(device_stream.stream);
   return 0;
 }

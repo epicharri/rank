@@ -22,7 +22,7 @@ namespace epic
       grid_size = 1ULL;
     int rank_version = parameters.rank_structure_version;
 
-    fprintf(stderr, "In call_rank_search.hpp: parameters.bits_in_superblock = %" PRIu64 "\n", parameters.bits_in_bit_vector);
+    fprintf(stderr, "In call_rank_search.hpp: parameters.bits_in_superblock = %" PRIu64 "\n", parameters.bits_in_superblock);
 
     switch (parameters.bits_in_superblock)
     {

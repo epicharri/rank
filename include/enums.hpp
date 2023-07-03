@@ -13,6 +13,8 @@ namespace epic
       one_zero_and_then_all_ones_bit_vector = 1,
       random_bit_vector = 2,
       from_file_bit_vector = 3,
+      sequential_positions = 1,
+      random_positions = 2,
       write_only = true,
       not_write_only = false
     };
