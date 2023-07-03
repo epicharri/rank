@@ -221,6 +221,18 @@ inline u64 RankSearch::give_random_position(u64 position_index)
 
 int RankSearch::create_random_positions()
 {
+  u64 position;
+  for (u64 j = 0ULL; j < number_of_positions; j += 1ULL)
+  {
+    position = give_random_position(j);
+    host_positions_in.data[j] = position;
+  }
+  CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data, host_positions_in.data, host_positions_in.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
+  return 0;
+}
+/*
+int RankSearch::create_random_positions()
+{
   u64 batch_size_in_bytes = 1ULL << 30; // 2**30 B = 1 GB
   u64 batch_size_in_words = batch_size_in_bytes / sizeof(u64);
   u64 last_batch_number = number_of_positions / batch_size_in_words;
@@ -256,3 +268,4 @@ int RankSearch::create_random_positions()
   cudaStreamSynchronize(device_stream.stream);
   return 0;
 }
+*/
