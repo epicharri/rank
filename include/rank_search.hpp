@@ -65,22 +65,44 @@ int RankSearch::check()
   {
     u64 number_of_errors = 0ULL;
     u64 position, rank;
+    u64 first_error_position = 0xffff'ffff'ffff'ffff;
+    u64 first_error_rank = 0xffff'ffff'ffff'ffff;
+    u64 first_error_index = 0xffff'ffff'ffff'ffff;
+    bool first_error_not_found = true;
+    u64 err;
     for (u64 i = 0ULL; i < number_of_positions; i += 1ULL)
     {
       position = host_positions_in.data[i]; // rank(0) = 0, rank (1) = 0, rank (2) = 1, rank(3) = 2, ...
       rank = host_results_out.data[i];
+
       if (position == 0ULL)
       {
-        number_of_errors += (u64)(rank != 0ULL);
+        err = (u64)(rank != 0ULL);
+        number_of_errors += err;
+        if (err && first_error_not_found)
+        {
+          first_error_position = 0ULL;
+          first_error_rank = rank;
+          first_error_index = 0ULL;
+        }
       }
       else
       {
-        number_of_errors += (u64)(rank != (position - 1ULL));
+        err = (u64)(rank != (position - 1ULL));
+        if (err && first_error_not_found)
+        {
+          first_error_position = position;
+          first_error_rank = rank;
+          first_error_index = i;
+        }
       }
     }
     if (number_of_errors)
     {
       fprintf(stderr, "ERROR!!! Number of errors is %" PRIu64 "\n", number_of_errors);
+      fprintf(stderr, "First error position: %" PRIu64 "\n", first_error_position);
+      fprintf(stderr, "First error rank: %" PRIu64 "\n", first_error_rank);
+      fprintf(stderr, "First error index: %" PRIu64 "\n", first_error_index);
     }
     else
     {
