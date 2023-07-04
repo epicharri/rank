@@ -1,6 +1,7 @@
 #pragma once
 #include "../globals.hpp"
 #include "cuda.hpp"
+#include <vector>
 
 namespace epic
 {
@@ -12,8 +13,11 @@ namespace epic
 
             cudaStream_t stream;
             cudaError_t err;
-            cudaEvent_t start;
-            cudaEvent_t stop;
+            std::vector<cudaEvent_t> start_events;
+            std::vector<cudaEvent_t> stop_events;
+
+            // cudaEvent_t start;
+            // cudaEvent_t stop;
             void create();
             void start_timer();
             void stop_timer();
@@ -27,8 +31,16 @@ namespace epic
         DeviceStream::~DeviceStream()
         {
             DEBUG_BEFORE_DESTRUCT("DeviceStream (ALL)");
-            cudaEventDestroy(start);
-            cudaEventDestroy(stop);
+            for (int i = 0; i < start_events.size(); i++)
+            {
+                cudaEventDestroy(start_events.pop_back());
+            }
+            for (int i = 0; i < stop_events.size(); i++)
+            {
+                cudaEventDestroy(stop_events.pop_back());
+            }
+            //          cudaEventDestroy(start);
+            //          cudaEventDestroy(stop);
 
             err = cudaStreamDestroy(stream);
             DEBUG_AFTER_DESTRUCT("DeviceStream (ALL)");
@@ -37,25 +49,31 @@ namespace epic
         void DeviceStream::create()
         {
             err = cudaStreamCreate(&stream);
-            cudaEventCreate(&start);
-            cudaEventCreate(&stop);
+            //          cudaEventCreate(&start);
+            //          cudaEventCreate(&stop);
         }
 
         void DeviceStream::start_timer()
         {
+            cudaEvent_t start;
+            cudaEventCreate(&start);
+            cudaEvent_t stop;
+            cudaEventCreate(&stop);
+            start_events.push_back(start);
+            stop_events.push_back(stop);
             cudaEventRecord(start, stream);
         }
 
         void DeviceStream::stop_timer()
         {
-            cudaEventRecord(stop, stream);
+            cudaEventRecord(stop_events.back(), stream);
         }
 
         float DeviceStream::duration_in_millis()
         {
             float milliseconds;
-            cudaEventSynchronize(stop);
-            cudaEventElapsedTime(&milliseconds, start, stop);
+            cudaEventSynchronize(stop_events.back());
+            cudaEventElapsedTime(&milliseconds, start_events.pop_back(), stop_events.pop_back());
             return milliseconds;
         }
 

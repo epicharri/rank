@@ -10,13 +10,14 @@ NVCC = nvcc
 
 all: $(BUILD_PATH)
 
-$(BUILD_PATH):
+$(BUILD_PATH): $(SOURCE_PATH) $(wildcard $(INCLUDE_PATH)/*.hpp)
+	mkdir -p $(dir $@)
 	module load gcc
 	module load cuda
-	$(NVCC) $(NVCC_FLAGS) -o $@ $(SOURCE_PATH)
-	cuobjdump -ptx $@ > $@.ptx
-	cuobjdump -sass $@ > $@.sass
+	if $(NVCC) $(NVCC_FLAGS) -o $@ $(SOURCE_PATH); then \
+		cuobjdump -ptx $@ > $@.ptx; \
+		cuobjdump -sass $@ > $@.sass; \
+	fi
 
 clean:
-	rm -f $(BUILD_PATH) $(BUILD_PATH).ptx $(BUILD_PATH).sass
-
+	rm -rf $(BUILD_PATH) $(BUILD_PATH).ptx $(BUILD_PATH).sass
