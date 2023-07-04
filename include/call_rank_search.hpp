@@ -12,7 +12,7 @@ namespace epic
   {
     if (device_is_nvidia_a100)
     {
-      cudaDeviceSetLimit(cudaLimitMaxL2FetchGranularity, parameters.device_set_limit_presearch); // only in Nvidia A100
+      cudaDeviceSetLimit(cudaLimitMaxL2FetchGranularity, parameters.device_set_limit_search); // only in Nvidia A100
     }
     u64 block_size, grid_size;
     block_size = parameters.threads_per_block;
