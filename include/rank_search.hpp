@@ -27,7 +27,7 @@ public:
   DeviceArray device_positions_in_and_results_out;
   u64 number_of_positions = 0ULL;
   bool device_is_nvidia_a100 = true;
-  int print_results(u64);
+  int save_results(u64);
   int fetch_results();
   int check();
   int create();
@@ -55,8 +55,14 @@ int RankSearch::fetch_results()
   return 0;
 }
 
-int RankSearch::print_results(u64 count)
+int RankSearch::save_results(u64 count = 0ULL)
 {
+  if (!parameters.store_results)
+  {
+    fprintf(stderr, "Based on the parameter given, the results are not stored.\n");
+    return 0;
+  }
+
   for (u64 i = 0ULL; i < number_of_positions && i < count; i += 1ULL)
   {
     fprintf(stdout, "%" PRIu64 " ", host_results_out.data[i]);
@@ -236,42 +242,3 @@ int RankSearch::create_random_positions()
   CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data, host_positions_in.data, host_positions_in.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
   return 0;
 }
-/*
-int RankSearch::create_random_positions()
-{
-  u64 batch_size_in_bytes = 1ULL << 30; // 2**30 B = 1 GB
-  u64 batch_size_in_words = batch_size_in_bytes / sizeof(u64);
-  u64 last_batch_number = number_of_positions / batch_size_in_words;
-
-  if (number_of_positions < batch_size_in_words)
-  {
-    batch_size_in_words = number_of_positions;
-    batch_size_in_bytes = batch_size_in_words * sizeof(u64);
-    last_batch_number = 0ULL;
-  }
-
-  srandom(2);
-
-  u64 position_index = 0ULL;
-  for (u64 batch_number = 0ULL; batch_number < last_batch_number; batch_number += 1ULL)
-  {
-    for (u64 j = 0ULL; j < batch_size_in_words; j += 1ULL)
-    {
-      position_index = batch_number * batch_size_in_words + j;
-      host_positions_in.data[position_index] = give_random_position(position_index);
-    }
-    CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + batch_number * batch_size_in_words, host_positions_in.data + batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
-    batch_number += 1ULL;
-  }
-
-  for (u64 j = last_batch_number * batch_size_in_words; j < number_of_positions; j += 1ULL)
-  {
-    position_index = j;
-    host_positions_in.data[position_index] = give_random_position(position_index);
-  }
-  batch_size_in_bytes = (number_of_positions - last_batch_number * batch_size_in_words) * sizeof(u64);
-  CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data + last_batch_number * batch_size_in_words, host_positions_in.data + last_batch_number * batch_size_in_words, batch_size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
-  cudaStreamSynchronize(device_stream.stream);
-  return 0;
-}
-*/

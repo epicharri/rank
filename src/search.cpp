@@ -11,27 +11,27 @@ int main(int argc, char **argv)
     return 0;
   if (searcher.create())
   {
-    fprintf(stderr, "Something went wronk in searcher.create().\n");
+    fprintf(stderr, "Something went wrong in searcher.create().\n");
     return 0;
   }
   if (searcher.search())
   {
-    fprintf(stderr, "Something went wronk in searcher.search().\n");
+    fprintf(stderr, "Something went wrong in searcher.search().\n");
     return 0;
   }
   if (searcher.fetch_results())
   {
-    fprintf(stderr, "Something went wronk in searcher.fetch_results().\n");
+    fprintf(stderr, "Something went wrong in searcher.fetch_results().\n");
     return 0;
   }
   if (searcher.check())
   {
-    fprintf(stderr, "Something went wronk in searcher.check().\n");
+    fprintf(stderr, "Something went wrong in searcher.check().\n");
     return 0;
   }
-  if (searcher.print_results(100000))
+  if (searcher.print_results())
   {
-    fprintf(stderr, "Something went wronk in searcher.print_results().\n");
+    fprintf(stderr, "Something went wrong in searcher.print_results().\n");
     return 0;
   }
   return 0;

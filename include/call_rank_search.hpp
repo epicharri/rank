@@ -89,11 +89,9 @@ namespace epic
       // Super block size 4096 with cum_poppy is not supported
       else if (rank_version == kind::cum_poppy)
         printf("Super block size 4096 with cumulative poppy is not supported, and the search is not completed.");
-      // return epic::gpu::launch_rank_search_kernel<4096, false, kind::poppy>(grid_size, block_size, device_stream, bit_vector, rank_index, positions_in_and_results_out, number_of_positions);
 
       break;
     }
-    printf("Return 0.0\n");
     return 0.0;
   }
 
