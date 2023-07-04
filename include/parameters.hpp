@@ -12,15 +12,11 @@ namespace epic
 
     struct
     {
-        //        std::string command = "benchmark";
-        //        std::string rank_benchmark = "--rank_benchmark"; // For benchmarking rank only.
-        //        std::string without_presearch = "--without-presearch";
         std::string do_not_store_results = "--do-not-store-results";
         std::string with_shuffles = "--with-shuffles";
         std::string sequential_positions = "--sequential-positions";
         std::string random_positions = "--random-positions";
         std::regex start_position{"^--start-position=([0-9]+)$"};
-
         std::regex bits_in_superblock_regex{"^--bits-in-superblock=(256|512|1024|2048|4096)$"};
         std::regex bits_in_bit_vector{"^--bits-in-bit-vector=([0-9]+)$"};
         std::string random_bit_vector = "--random-bit-vector";
@@ -28,22 +24,71 @@ namespace epic
         std::regex query_positions_count{"^--query-positions-count=([0-9]+)$"};
         std::regex device_set_limit_presearch_regex{"^--device-set-limit-presearch=(32|64|128)$"};
         std::regex device_set_limit_search_regex{"^--device-set-limit-search=(32|64|128)$"};
-        //        std::regex k_regex{"^--k=([3-9]|([1-2][0-9])|3[0-2])$"};
-        //        std::regex k_presearch_regex{"^--k-presearch=([1-9]|(1[0-5]))$"};
-        //        std::regex filename_a_regex{"^--file-a=.+$"};
-        //        std::regex filename_c_regex{"^--file-c=.+$"};
-        //        std::regex filename_g_regex{"^--file-g=.+$"};
-        //        std::regex filename_t_regex{"^--file-t=.+$"};
-        //        std::regex filename_queries_regex{"^--file-queries=.+$"};
-        //        std::regex filename_answers_regex{"^--file-answers=.+$"};
         std::regex threads_per_block_regex{"^--threads-per-block=([0-9][0-9][0-9]?[0-9]?)$"};
         std::regex rank_structure_poppy_regex{"^--rank-structure=poppy$"};
         std::regex rank_structure_cum_poppy_regex{"^--rank-structure=cum-poppy$"};
-        //        std::regex rank_structure_flat_poppy_regex{"^--rank-structure=flat-poppy$"};
-        //        std::regex rank_word_size_regex{"^--rank-word-size=(32|64)$"};
-        //        std::regex use_unified_memory_for_queries_regex{"^--unified-searches$"};
-
     } Options;
+
+    struct BenchmarkInfo
+    {
+        u64 number_of_bytes_padded_bit_vector = 0ULL;
+        u64 number_of_bytes_padded_layer_0 = 0ULL;
+        u64 number_of_bytes_padded_layer_12 = 0ULL;
+
+        u64 number_of_positions = 0ULL;
+
+        float millis_allocate_host_memory_for_bit_vector = 0.0;
+        float millis_allocate_device_memory_for_bit_vector = 0.0;
+        float millis_allocate_host_memory_for_L0 = 0.0;
+        float millis_allocate_device_memory_for_L0 = 0.0;
+        float millis_allocate_host_memory_for_L12 = 0.0;
+        float millis_allocate_device_memory_for_L12 = 0.0;
+        float millis_free_host_memory_of_bit_vector = 0.0;
+        float millis_transfer_bit_vector_H_to_D = 0.0;
+        float millis_transfer_positions_H_to_D = 0.0;
+        float millis_transfer_results_D_to_H = 0.0;
+        float millis_search = 0.0;
+
+        u64 get_number_of_bits_padded_bit_vector();
+        u64 get_number_of_bytes_padded_bit_vector();
+        u64 get_number_of_words_padded_bit_vector();
+
+        u64 get_number_of_bits_padded_layer_0();
+        u64 get_number_of_bits_padded_layer_12();
+
+        u64 get_number_of_bytes_padded_layer_0();
+        u64 get_number_of_bytes_padded_layer_12();
+
+        u64 get_number_of_words_padded_layer_0();
+        u64 get_number_of_words_padded_layer_12();
+
+        int print_benchmark_info();
+        BenchmarkInfo() = default();
+    }
+
+    BenchmarkInfo::print_benchmark_info()
+    {
+        // Here the printing.
+        return 0;
+    }
+
+    BenchmarkInfo::get_number_of_bits_padded_bit_vector()
+    {
+        return number_of_bytes_padded_bit_vector * 8ULL;
+    }
+
+    BenchmarkInfo::get_number_of_bytes_padded_bit_vector() { return number_of_bytes_padded_bit_vector; }
+
+    BenchmarkInfo::get_number_of_words_padded_bit_vector() { return number_of_bytes_padded_bit_vector / 8ULL; }
+
+    BenchmarkInfo::get_number_of_bits_padded_layer_0() { return number_of_bytes_padded_layer_0 * 8ULL; }
+    BenchmarkInfo::get_number_of_bits_padded_layer_12() { return number_of_bytes_padded_layer_12 * 8ULL; }
+
+    BenchmarkInfo::get_number_of_bytes_padded_layer_0() { return number_of_bytes_padded_layer_0; }
+    BenchmarkInfo::get_number_of_bytes_padded_layer_12() { return number_of_bytes_padded_layer_12; }
+
+    BenchmarkInfo::get_number_of_words_padded_layer_0() { return number_of_bytes_padded_layer_0 / 8ULL; }
+    BenchmarkInfo::get_number_of_words_padded_layer_12() { return number_of_bytes_padded_layer_12 / 8ULL; }
 
     struct Parameters
     {
@@ -52,8 +97,6 @@ namespace epic
         u64 query_positions_count = 0ULL;
         u64 start_position = 0ULL;
         int positions_type = epic::kind::random_positions;
-        //        bool with_presearch = true;
-        //        bool rank_benchmark = false;
         u32 bits_in_superblock = 1024U; // Default
         int device_set_limit_presearch = 64;
         int device_set_limit_search = 64;
@@ -61,20 +104,11 @@ namespace epic
         bool store_results = true;
         int rank_structure_version = kind::poppy; // Default
         int rank_data_word_size = 64;             // Default
-                                                  //        u32 k = 30U;
-                                                  //        u32 k_presearch = 12U;
         u32 threads_per_block = 0U;
-        //        bool use_unified_memory_for_queries = false;
-        //        std::string filename_A = "";
-        //        std::string filename_C = "";
-        //        std::string filename_G = "";
-        //        std::string filename_T = "";
-        //        std::string fileQueries = "";
-        //        std::string fileAnswers = "";
-
         void print_copyright();
         void print_help();
         int read_arguments(int argc, char **argv, cudaDeviceProp &);
+        BenchmarkInfo benchmark_info;
         Parameters() = default;
     };
 
@@ -117,17 +151,6 @@ namespace epic
         for (int i = 0; i < arguments.size(); i++)
         {
             std::string parameter = arguments[i];
-            /*            if (parameter.compare(Options.without_presearch) == 0)
-                        { // == 0 means equality
-                            with_presearch = false;
-                            continue;
-                        }
-                        if (parameter.compare(Options.rank_benchmark) == 0)
-                        { // == 0 means equality
-                            rank_benchmark = true;
-                            continue;
-                        }
-                        */
             if (parameter.compare(Options.do_not_store_results) == 0)
             { // == 0 means equality
                 store_results = false;
@@ -162,19 +185,6 @@ namespace epic
                 rank_structure_version = epic::kind::cum_poppy;
                 continue;
             }
-            /*
-            if (std::regex_match(parameter, Options.rank_structure_flat_poppy_regex))
-            {
-                rank_structure_version = epic::kind::flat_poppy;
-                continue;
-            }
-
-            if (std::regex_match(parameter, Options.rank_word_size_regex))
-            {
-                rank_data_word_size = std::stoi(parameter.substr(12, 2));
-                continue;
-            }
-            */
             if (std::regex_match(parameter, Options.bits_in_superblock_regex))
             {
                 bits_in_superblock = std::stoi(parameter.substr(21, 4));
@@ -231,13 +241,6 @@ namespace epic
                 continue;
             }
         }
-        /*
-        fprintf(stderr, "Filename of the bit vector A: %s\n", filename_A.c_str());
-        fprintf(stderr, "Filename of the bit vector C: %s\n", filename_C.c_str());
-        fprintf(stderr, "Filename of the bit vector G: %s\n", filename_G.c_str());
-        fprintf(stderr, "Filename of the bit vector T: %s\n", filename_T.c_str());
-        fprintf(stderr, "Filename of the query file: %s\n", fileQueries.c_str());
-        */
         if (threads_per_block == 0U)
             threads_per_block = max_threads_per_block;
         fprintf(stderr, "Rank structure word size: %d\n", rank_data_word_size);
@@ -246,12 +249,9 @@ namespace epic
             version = "poppy";
         if (rank_structure_version == kind::cum_poppy)
             version = "cum-poppy";
-        /*
-        if (rank_structure_version == kind::flat_poppy)
-            version = "flat-poppy";
-        */
         fprintf(stderr, "Bits in the bit vector = %" PRIu64 "\n", bits_in_bit_vector);
-        fprintf(stderr, "Start position = %" PRIu64 "\n", start_position);
+        if (bit_vector_data_type == epic::kind::sequential_positions)
+            fprintf(stderr, "Start position = %" PRIu64 "\n", start_position);
         fprintf(stderr, "Number of positions = %" PRIu64 "\n", query_positions_count);
 
         std::string bit_vector_content = "Bit vector content: after one zero, all bits are ones.";
@@ -272,39 +272,9 @@ namespace epic
         {
             fprintf(stderr, "Without shuffles.\n");
         }
-        /*
-        if (with_presearch)
-            fprintf(stderr, "With presearch.\n");
-        else
-            fprintf(stderr, "Without presearch.\n");
-
-        fprintf(stderr, "k=%" PRIu32 ".\n", k);
-        if ((k < 3U) || (k > 32U))
-        {
-            fprintf(stderr, "The value of k must be at least 3 and at most 32.\n");
-            return 1;
-        }
-        if (with_presearch)
-        {
-            if ((k_presearch < 5U) || k_presearch > 13U)
-            {
-                fprintf(stderr, "The value of the prefix of k-mers to be presearched must be at least 5 and at most 13.\n");
-                k_presearch = 12U;
-            }
-            fprintf(stderr, "The length of the prefix of k-mer to be presearched is set into %" PRIu32 ".\n", k_presearch);
-        }
-        else
-        {
-            k_presearch = 0U;
-        }
-        */
         fprintf(stderr, "Set LimitMaxL2FetchGranularity in presearch to %d.\n", device_set_limit_presearch);
         fprintf(stderr, "Set LimitMaxL2FetchGranularity in search to %d.\n\n", device_set_limit_search);
         BENCHMARK_CODE(fprintf(stderr, "Threads per block: %" PRIu32 ".\n", threads_per_block);)
-        /*
-        if (use_unified_memory_for_queries)
-            fprintf(stderr, "Using unified memory for query data and positions.\n");
-        */
         if ((bits_in_superblock == 4096) && (rank_structure_version != kind::poppy))
         {
             fprintf(stderr, "Superblock size 4096 bits is supported only in the rank structure version poppy. Please choose some other parameters.\n");

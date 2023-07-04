@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "Something went wrong in searcher.check().\n");
     return 0;
   }
-  if (searcher.print_results())
+  if (searcher.save_results())
   {
     fprintf(stderr, "Something went wrong in searcher.print_results().\n");
     return 0;
