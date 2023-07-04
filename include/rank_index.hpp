@@ -66,6 +66,9 @@ inline int RankIndex::init(u64 the_number_of_bits, u64 the_number_of_words_padde
 
 inline int RankIndex::allocate_memory(epic::gpu::DeviceStream &device_stream)
 {
+  BENCHMARK_CODE(fprintf(stderr, "Layer 0 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_0 * 8ULL)););
+  BENCHMARK_CODE(fprintf(stderr, "Layer 12 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_12 * 8ULL)););
+
   if (device_layer_0.create(
           number_of_words_padded_layer_0 * 8ULL, device_stream) |
       device_layer_12.create(

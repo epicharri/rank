@@ -79,7 +79,7 @@ int BitVector::construct(epic::gpu::DeviceStream &device_stream)
   auto stop = STOP_TIME;
   float millis = DURATION_IN_MILLISECONDS(start, stop);
   BENCHMARK_CODE(fprintf(stderr, "Creating the bit vector takes %f ms\n", millis);)
-
+  BENCHMARK_CODE(fprintf(stderr, "Bit vector size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded * 8ULL)););
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after fill_bit_vector_with_one_bits()\n");)
 
   device_stream.start_timer();
