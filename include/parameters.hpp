@@ -62,33 +62,34 @@ namespace epic
         u64 get_number_of_words_padded_layer_0();
         u64 get_number_of_words_padded_layer_12();
 
-        int print_benchmark_info();
-        BenchmarkInfo() = default();
+        int print_info();
+        BenchmarkInfo = default();
     }
 
-    BenchmarkInfo::print_benchmark_info()
+    int
+    BenchmarkInfo::print_info()
     {
         // Here the printing.
         return 0;
     }
 
-    BenchmarkInfo::get_number_of_bits_padded_bit_vector()
+    u64 BenchmarkInfo::get_number_of_bits_padded_bit_vector()
     {
         return number_of_bytes_padded_bit_vector * 8ULL;
     }
 
-    BenchmarkInfo::get_number_of_bytes_padded_bit_vector() { return number_of_bytes_padded_bit_vector; }
+    u64 BenchmarkInfo::get_number_of_bytes_padded_bit_vector() { return number_of_bytes_padded_bit_vector; }
 
-    BenchmarkInfo::get_number_of_words_padded_bit_vector() { return number_of_bytes_padded_bit_vector / 8ULL; }
+    u64 BenchmarkInfo::get_number_of_words_padded_bit_vector() { return number_of_bytes_padded_bit_vector / 8ULL; }
 
-    BenchmarkInfo::get_number_of_bits_padded_layer_0() { return number_of_bytes_padded_layer_0 * 8ULL; }
-    BenchmarkInfo::get_number_of_bits_padded_layer_12() { return number_of_bytes_padded_layer_12 * 8ULL; }
+    u64 BenchmarkInfo::get_number_of_bits_padded_layer_0() { return number_of_bytes_padded_layer_0 * 8ULL; }
+    u64 BenchmarkInfo::get_number_of_bits_padded_layer_12() { return number_of_bytes_padded_layer_12 * 8ULL; }
 
-    BenchmarkInfo::get_number_of_bytes_padded_layer_0() { return number_of_bytes_padded_layer_0; }
-    BenchmarkInfo::get_number_of_bytes_padded_layer_12() { return number_of_bytes_padded_layer_12; }
+    u64 BenchmarkInfo::get_number_of_bytes_padded_layer_0() { return number_of_bytes_padded_layer_0; }
+    u64 BenchmarkInfo::get_number_of_bytes_padded_layer_12() { return number_of_bytes_padded_layer_12; }
 
-    BenchmarkInfo::get_number_of_words_padded_layer_0() { return number_of_bytes_padded_layer_0 / 8ULL; }
-    BenchmarkInfo::get_number_of_words_padded_layer_12() { return number_of_bytes_padded_layer_12 / 8ULL; }
+    u64 BenchmarkInfo::get_number_of_words_padded_layer_0() { return number_of_bytes_padded_layer_0 / 8ULL; }
+    u64 BenchmarkInfo::get_number_of_words_padded_layer_12() { return number_of_bytes_padded_layer_12 / 8ULL; }
 
     struct Parameters
     {
