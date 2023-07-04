@@ -33,11 +33,13 @@ namespace epic
             DEBUG_BEFORE_DESTRUCT("DeviceStream (ALL)");
             for (int i = 0; i < start_events.size(); i++)
             {
-                cudaEventDestroy(start_events.pop_back());
+                cudaEventDestroy(start_events.back());
+                start_events.pop_back();
             }
             for (int i = 0; i < stop_events.size(); i++)
             {
-                cudaEventDestroy(stop_events.pop_back());
+                cudaEventDestroy(stop_events.back());
+                stop_events.pop_back();
             }
             //          cudaEventDestroy(start);
             //          cudaEventDestroy(stop);
@@ -73,7 +75,9 @@ namespace epic
         {
             float milliseconds;
             cudaEventSynchronize(stop_events.back());
-            cudaEventElapsedTime(&milliseconds, start_events.pop_back(), stop_events.pop_back());
+            cudaEventElapsedTime(&milliseconds, start_events.back(), stop_events.back());
+            start_events.pop_back();
+            stop_events.pop_back();
             return milliseconds;
         }
 
