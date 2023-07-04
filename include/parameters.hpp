@@ -63,11 +63,10 @@ namespace epic
         u64 get_number_of_words_padded_layer_12();
 
         int print_info();
-        BenchmarkInfo = default();
-    }
+        BenchmarkInfo() = default;
+    };
 
-    int
-    BenchmarkInfo::print_info()
+    int BenchmarkInfo::print_info()
     {
         // Here the printing.
         return 0;
