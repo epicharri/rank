@@ -72,24 +72,24 @@ inline int RankIndex::allocate_memory(epic::Parameters &parameters, epic::gpu::D
 
   device_stream.start_timer();
   if (device_layer_0.create(
-          number_of_words_padded_layer_0 * 8ULL, device_stream) |
-      device_layer_12.create(
-          number_of_words_padded_layer_12 * 8ULL, device_stream))
-  {
+          number_of_words_padded_layer_0 * 8ULL, device_stream))
     return 1;
-  }
   device_stream.stop_timer();
-  parameters.benchmark_info.millis_allocate_device_memory_for_rank_structures = device_stream.duration_in_millis();
-  auto start = START_TIME;
-  if (host_layer_0.create(
-          number_of_words_padded_layer_0 * 8ULL, epic::kind::not_write_only) |
-      host_layer_12.create(
-          number_of_words_padded_layer_12 * 8ULL, epic::kind::not_write_only))
-  {
+  parameters.benchmark_info.millis_allocate_device_memory_for_L0 = device_stream.duration_in_millis();
+  device_stream.start_timer();
+  if (device_layer_12.create(
+          number_of_words_padded_layer_12 * 8ULL, device_stream))
     return 1;
-  }
+  device_stream.stop_timer();
+  parameters.benchmark_info.millis_allocate_device_memory_for_L12 = device_stream.duration_in_millis();
+  auto start = START_TIME;
+  if (host_layer_0.create(number_of_words_padded_layer_0 * 8ULL, epic::kind::not_write_only))
+    return 1;
   auto stop = STOP_TIME;
-  parameters.benchmark_info.millis_allocate_host_memory_for_rank_structures = DURATION_IN_MILLISECONDS(start, stop);
+  parameters.benchmark_info.millis_allocate_host_memory_for_L0 = DURATION_IN_MILLISECONDS(start, stop);
+  start = START_TIME if (host_layer_12.create(number_of_words_padded_layer_12 * 8ULL, epic::kind::not_write_only)) return 1;
+  stop = STOP_TIME;
+  parameters.benchmark_info.millis_allocate_host_memory_for_L12 = DURATION_IN_MILLISECONDS(start, stop);
   return 0;
 }
 
