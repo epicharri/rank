@@ -94,13 +94,18 @@ int RankIndex::construct(epic::Parameters &parameters, HostArray &bit_vector_dat
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), after compute_index()\n");)
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before cudaMemcpy L0()\n");)
 
+  device_stream.start_timer();
   if (cudaMemcpyAsync(device_layer_0.data, host_layer_0.data, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
     return 1;
+  device_stream.stop_timer();
+  parameters.benchmark_info.millis_allocate_device_memory_for_L0 = device_stream.duration_in_millis();
 
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before cudaMemcpy L0()\n");)
-
+  device_stream.start_timer();
   if (cudaMemcpyAsync(device_layer_12.data, host_layer_12.data, host_layer_12.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
     return 1;
+  device_stream.stop_timer();
+  parameters.benchmark_info.millis_allocate_device_memory_for_L12 = device_stream.duration_in_millis();
   return 0;
 }
 

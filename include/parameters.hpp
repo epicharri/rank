@@ -181,11 +181,11 @@ namespace epic
         }
         if (store_results)
         {
-            benchmark_info.store_results_info = "The results are stored"
+            benchmark_info.store_results_info = "The results are stored";
         }
         else
         {
-            benchmark_info.store_results_info = "The results are not stored"
+            benchmark_info.store_results_info = "The results are not stored";
         }
         if (threads_per_block == 0U)
             threads_per_block = max_threads_per_block;

@@ -154,7 +154,7 @@ int RankSearch::create()
   if (bit_vector.destruct_host_data())
     return 1;
   device_stream.stop_timer();
-  parameters.benchmark_info.millis_free_host_memory_of_bit_vector();
+  parameters.benchmark_info.millis_free_host_memory_of_bit_vector = device_stream.duration_in_millis();
   auto stop = STOP_TIME;
   float millis = DURATION_IN_MILLISECONDS(start, stop);
   DEBUG_CODE(

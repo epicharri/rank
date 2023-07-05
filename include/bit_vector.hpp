@@ -72,7 +72,7 @@ int BitVector::create(epic::Parameters &parameters, epic::gpu::DeviceStream &dev
   return 0;
 }
 
-int BitVector::construct(epic::gpu::Parameters &parameters, epic::gpu::DeviceStream &device_stream)
+int BitVector::construct(epic::Parameters &parameters, epic::gpu::DeviceStream &device_stream)
 {
   auto start = START_TIME;
   if (bit_vector_content == epic::kind::one_zero_and_then_all_ones_bit_vector)
@@ -96,7 +96,7 @@ int BitVector::construct(epic::gpu::Parameters &parameters, epic::gpu::DeviceStr
   DEBUG_CODE(fprintf(stderr, "Transferring the bit vector from host to device takes %f ms\n", millis);)
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after cudaMemcpy, err nro %d\n", err);)
 
-  rank_index.construct(host_data, device_stream);
+  rank_index.construct(parameters, host_data, device_stream);
 
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after rank_index.construct()\n");) // Here???
 

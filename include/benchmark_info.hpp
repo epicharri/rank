@@ -72,15 +72,15 @@ int BenchmarkInfo::print_info()
           bit_vector_content.c_str(),
           positions_type.c_str(),
           shuffles.c_str(),
-          store_results_info.c_str())
+          store_results_info.c_str());
 
-      return 0;
+  return 0;
 }
 
 float BenchmarkInfo::get_nanos_per_query()
 {
-  nanos_per_query = (((double)millis_search) * 1000000.0) / ((double)number_of_positions);
-  return get_nanos_per_query;
+  float nanos_per_query = (((double)millis_search) * 1000000.0) / ((double)number_of_positions);
+  return nanos_per_query;
 }
 
 u64 BenchmarkInfo::get_number_of_bits_padded_bit_vector()
