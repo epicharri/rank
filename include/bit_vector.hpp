@@ -98,7 +98,7 @@ int BitVector::construct(epic::Parameters &parameters, epic::gpu::DeviceStream &
 
   rank_index.construct(parameters, host_data, device_stream);
 
-  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after rank_index.construct()\n");) // Here???
+  DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after rank_index.construct()\n");)
 
   return 0;
 }
