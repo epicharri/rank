@@ -5,6 +5,7 @@
 #include "../include/gpu/cuda.hpp"
 #include "../include/gpu/device_stream.hpp"
 #include "../include/host_array.hpp"
+#include "../include/parameters.hpp"
 
 struct RankIndex
 {
@@ -22,9 +23,9 @@ struct RankIndex
   u64 number_of_words_in_one_hyperblock_layer_12_in_host = 0ULL;
   u64 number_of_words_in_one_hyperblock_in_host = 0ULL;
   u64 absolute_count = 0ULL;
-  int create(u64, u64, u32, int, epic::gpu::DeviceStream &);
+  int create(u64, u64, u32, int, epic::Parameters &, epic::gpu::DeviceStream &);
   int init(u64, u64, u32, int);
-  int allocate_memory(epic::gpu::DeviceStream &);
+  int allocate_memory(epic::Parameters &, epic::gpu::DeviceStream &);
   template <u32 words_in_basicblock>
   int precount_the_structures_based_on_words_in_basicblock(HostArray &, epic::gpu::DeviceStream &, u64);
   template <u32 words_in_basicblock>
@@ -39,11 +40,11 @@ struct RankIndex
 
 RankIndex::~RankIndex(){};
 
-int RankIndex::create(u64 the_number_of_bits, u64 the_number_of_words_padded_bit_vector, u32 the_bits_in_superblock, int the_rank_version, epic::gpu::DeviceStream &device_stream)
+int RankIndex::create(u64 the_number_of_bits, u64 the_number_of_words_padded_bit_vector, u32 the_bits_in_superblock, int the_rank_version, epic::Parameters &parameters, epic::gpu::DeviceStream &device_stream)
 {
   if (init(the_number_of_bits, the_number_of_words_padded_bit_vector, the_bits_in_superblock, the_rank_version))
     return 1;
-  if (allocate_memory(device_stream))
+  if (allocate_memory(parameters, device_stream))
     return 1;
   return 0;
 }
@@ -64,11 +65,12 @@ inline int RankIndex::init(u64 the_number_of_bits, u64 the_number_of_words_padde
   return 0;
 }
 
-inline int RankIndex::allocate_memory(epic::gpu::DeviceStream &device_stream)
+inline int RankIndex::allocate_memory(epic::Parameters parameters, epic::gpu::DeviceStream &device_stream)
 {
   DEBUG_CODE(fprintf(stderr, "Layer 0 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_0 * 8ULL)););
   DEBUG_CODE(fprintf(stderr, "Layer 12 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_12 * 8ULL)););
 
+  device_stream.start_timer();
   if (device_layer_0.create(
           number_of_words_padded_layer_0 * 8ULL, device_stream) |
       device_layer_12.create(
@@ -76,6 +78,9 @@ inline int RankIndex::allocate_memory(epic::gpu::DeviceStream &device_stream)
   {
     return 1;
   }
+  device_stream.stop_timer();
+  parameters.benchmark_info.millis_allocate_device_memory_for_rank_structures = device_stream.duration_in_millis();
+  auto start = START_TIME;
   if (host_layer_0.create(
           number_of_words_padded_layer_0 * 8ULL, epic::kind::not_write_only) |
       host_layer_12.create(
@@ -83,6 +88,8 @@ inline int RankIndex::allocate_memory(epic::gpu::DeviceStream &device_stream)
   {
     return 1;
   }
+  auto stop = STOP_TIME;
+  parameters.benchmark_info.millis_allocate_host_memory_for_rank_structures = DURATION_IN_MILLISECONDS(start, stop);
   return 0;
 }
 

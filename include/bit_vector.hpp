@@ -64,7 +64,7 @@ int BitVector::create(epic::Parameters &parameters, epic::gpu::DeviceStream &dev
   if (allocate_memory_for_data(parameters, device_stream))
     return 1;
   DEBUG_CODE(fprintf(stderr, "Memory allocated for the bit vector.\n");)
-  if (rank_index.create(number_of_bits, number_of_words_padded, parameters.bits_in_superblock, parameters.rank_structure_version, device_stream))
+  if (rank_index.create(number_of_bits, number_of_words_padded, parameters.bits_in_superblock, parameters.rank_structure_version, parameters, device_stream))
     return 1;
   parameters.benchmark_info.number_of_bytes_padded_layer_0 = rank_index.host_layer_0.size_in_bytes;
   parameters.benchmark_info.number_of_bytes_padded_layer_12 = rank_index.host_layer_12.size_in_bytes;

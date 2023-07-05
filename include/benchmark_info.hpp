@@ -16,7 +16,7 @@ struct BenchmarkInfo
   u64 start_position = 0ULL;
 
   u32 threads_per_block = 0ULL;
-  u64 number_of_errors = 0ULL;
+  u64 number_of_errors = ~0ULL; // Default is max u64 integer, to make sure the value is set correctly during the search.
   std::string rank_structure_version = "";
   std::string bit_vector_content = "";
   std::string positions_type = "";
@@ -25,10 +25,8 @@ struct BenchmarkInfo
 
   float millis_allocate_host_memory_for_bit_vector = 0.0;
   float millis_allocate_device_memory_for_bit_vector = 0.0;
-  float millis_allocate_host_memory_for_L0 = 0.0;
-  float millis_allocate_device_memory_for_L0 = 0.0;
-  float millis_allocate_host_memory_for_L12 = 0.0;
-  float millis_allocate_device_memory_for_L12 = 0.0;
+  float millis_allocate_host_memory_for_rank_structures = 0.0;
+  float millis_allocate_device_memory_for_rank_structures = 0.0;
   float millis_free_host_memory_of_bit_vector = 0.0;
   float millis_transfer_bit_vector_H_to_D = 0.0;
   float millis_transfer_positions_H_to_D = 0.0;
@@ -73,7 +71,7 @@ int BenchmarkInfo::print_info()
           shuffles.c_str(),
           store_results_info.c_str());
 
-  fprintf(stderr, "millis_allocate_host_memory_for_bit_vector:\n%f\nmillis_allocate_device_memory_for_bit_vector:\n%f\nmillis_allocate_host_memory_for_L0:\n%f\nmillis_allocate_device_memory_for_L0:\n%f\nmillis_allocate_host_memory_for_L12:\n%f\nmillis_allocate_device_memory_for_L12:\n%f\nmillis_free_host_memory_of_bit_vector:\n%f\nmillis_transfer_bit_vector_H_to_D:\n%f\nmillis_transfer_positions_H_to_D:\n%f\nmillis_transfer_results_D_to_H:\n%f\nmillis_search:\n%f\nnanos_per_query:\n%f\n", millis_allocate_host_memory_for_bit_vector, millis_allocate_device_memory_for_bit_vector, millis_allocate_host_memory_for_L0, millis_allocate_device_memory_for_L0, millis_allocate_host_memory_for_L12, millis_allocate_device_memory_for_L12, millis_free_host_memory_of_bit_vector, millis_transfer_bit_vector_H_to_D, millis_transfer_positions_H_to_D, millis_transfer_results_D_to_H, millis_search, get_nanos_per_query());
+  fprintf(stderr, "millis_allocate_host_memory_for_bit_vector:\n%f\nmillis_allocate_device_memory_for_bit_vector:\n%f\nmillis_allocate_host_memory_for_rank_structures:\n%f\nmillis_allocate_device_memory_for_rank_structures:\n%f\n%f\nmillis_free_host_memory_of_bit_vector:\n%f\nmillis_transfer_bit_vector_H_to_D:\n%f\nmillis_transfer_positions_H_to_D:\n%f\nmillis_transfer_results_D_to_H:\n%f\nmillis_search:\n%f\nnanos_per_query:\n%f\n", millis_allocate_host_memory_for_bit_vector, millis_allocate_device_memory_for_bit_vector, millis_allocate_host_memory_for_rank_structures, millis_allocate_device_memory_for_rank_structures, millis_free_host_memory_of_bit_vector, millis_transfer_bit_vector_H_to_D, millis_transfer_positions_H_to_D, millis_transfer_results_D_to_H, millis_search, get_nanos_per_query());
 
   fprintf(stderr, "number_of_bits_padded_bit_vector:\n%" PRIu64 "\nnumber_of_bytes_padded_bit_vector:\n%" PRIu64 "\nnumber_of_words_padded_bit_vector:\n%" PRIu64 "\nnumber_of_words_in_bit_vector:\n%" PRIu64 "\nnumber_of_bits_padded_layer_0:\n%" PRIu64 "\nnumber_of_bits_padded_layer_12:\n%" PRIu64 "\nnumber_of_bytes_padded_layer_0:\n%" PRIu64 "\nnumber_of_bytes_padded_layer_12:\n%" PRIu64 "\nnumber_of_words_padded_layer_0:\n%" PRIu64 "\nnumber_of_words_padded_layer_12:\n%" PRIu64 "\n", get_number_of_bits_padded_bit_vector(), get_number_of_bytes_padded_bit_vector(), get_number_of_words_padded_bit_vector(), get_number_of_words_in_bit_vector(), get_number_of_bits_padded_layer_0(), get_number_of_bits_padded_layer_12(), get_number_of_bytes_padded_layer_0(), get_number_of_bytes_padded_layer_12(), get_number_of_words_padded_layer_0(), get_number_of_words_padded_layer_12());
   return 0;

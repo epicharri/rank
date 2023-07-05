@@ -205,6 +205,7 @@ int RankSearch::create()
     }
     DEBUG_CODE(fprintf(stderr, "Creating sequential positions: SUCCESS.\n");)
   }
+
   device_stream.stop_timer();
   float millis_stream_create_positions = device_stream.duration_in_millis(); // This synchronizes the stream, i.e. blocks CPU until ready.
   auto stop_create_positions = STOP_TIME;
@@ -224,7 +225,10 @@ int RankSearch::create_sequential_positions(u64 start)
     position = start + j;
     host_positions_in.data[j] = position;
   }
+  device_stream.start_timer();
   CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data, host_positions_in.data, host_positions_in.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
+  device_stream.stop_timer();
+  parameters.benchmark_info.millis_transfer_positions_H_to_D = device_stream.duration_in_millis();
   return 0;
 }
 
@@ -245,6 +249,9 @@ int RankSearch::create_random_positions()
     position = give_random_position(j);
     host_positions_in.data[j] = position;
   }
+  device_stream.start_timer();
   CHECK(cudaMemcpyAsync(device_positions_in_and_results_out.data, host_positions_in.data, host_positions_in.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
+  device_stream.stop_timer();
+  parameters.benchmark_info.millis_transfer_positions_H_to_D = device_stream.duration_in_millis();
   return 0;
 }
