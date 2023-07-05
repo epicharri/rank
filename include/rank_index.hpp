@@ -65,7 +65,7 @@ inline int RankIndex::init(u64 the_number_of_bits, u64 the_number_of_words_padde
   return 0;
 }
 
-inline int RankIndex::allocate_memory(epic::Parameters parameters, epic::gpu::DeviceStream &device_stream)
+inline int RankIndex::allocate_memory(epic::Parameters &parameters, epic::gpu::DeviceStream &device_stream)
 {
   DEBUG_CODE(fprintf(stderr, "Layer 0 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_0 * 8ULL)););
   DEBUG_CODE(fprintf(stderr, "Layer 12 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_12 * 8ULL)););
@@ -105,14 +105,14 @@ int RankIndex::construct(epic::Parameters &parameters, HostArray &bit_vector_dat
   if (cudaMemcpyAsync(device_layer_0.data, host_layer_0.data, host_layer_0.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
     return 1;
   device_stream.stop_timer();
-  parameters.benchmark_info.millis_allocate_device_memory_for_L0 = device_stream.duration_in_millis();
+  parameters.benchmark_info.millis_transfer_L0_H_to_D = device_stream.duration_in_millis();
 
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before cudaMemcpy L0()\n");)
   device_stream.start_timer();
   if (cudaMemcpyAsync(device_layer_12.data, host_layer_12.data, host_layer_12.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream))
     return 1;
   device_stream.stop_timer();
-  parameters.benchmark_info.millis_allocate_device_memory_for_L12 = device_stream.duration_in_millis();
+  parameters.benchmark_info.millis_transfer_L12_H_to_D = device_stream.duration_in_millis();
   return 0;
 }
 
