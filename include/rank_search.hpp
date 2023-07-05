@@ -35,12 +35,18 @@ public:
   inline u64 give_random_position(u64);
   int create_random_positions();
   int create_sequential_positions(u64);
+  int print_benchmark_info();
   RankSearch() = default;
   ~RankSearch();
 };
 
 RankSearch::~RankSearch()
 {
+}
+
+int RankSearch::print_benchmark_info()
+{
+  return parameters.benchmark_info.print_info();
 }
 
 int RankSearch::fetch_results()

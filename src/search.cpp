@@ -34,5 +34,10 @@ int main(int argc, char **argv)
     fprintf(stderr, "Something went wrong in searcher.print_results().\n");
     return 0;
   }
+  if (searcher.print_benchmark_info())
+  {
+    fprintf(stderr, "Something went wrong in searcher.print_results().\n");
+    return 0;
+  }
   return 0;
 }
