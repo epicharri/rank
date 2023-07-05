@@ -92,7 +92,7 @@ int BitVector::construct(epic::Parameters &parameters, epic::gpu::DeviceStream &
   cudaError_t err = cudaMemcpyAsync(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream);
   device_stream.stop_timer();
   millis = device_stream.duration_in_millis();
-  parameters.benchmark_info.millis_bit_vector_H_to_D = millis;
+  parameters.benchmark_info.millis_transfer_bit_vector_H_to_D = millis;
   DEBUG_CODE(fprintf(stderr, "Transferring the bit vector from host to device takes %f ms\n", millis);)
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after cudaMemcpy, err nro %d\n", err);)
 
