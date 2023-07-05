@@ -36,7 +36,8 @@ namespace epic
         u64 number_of_bytes_padded_layer_12 = 0ULL;
 
         u64 number_of_positions = 0ULL;
-
+        u32 threads_per_block = 0ULL;
+        std::string rank_structure_version = "";
         float millis_allocate_host_memory_for_bit_vector = 0.0;
         float millis_allocate_device_memory_for_bit_vector = 0.0;
         float millis_allocate_host_memory_for_L0 = 0.0;
@@ -243,12 +244,14 @@ namespace epic
         }
         if (threads_per_block == 0U)
             threads_per_block = max_threads_per_block;
-        fprintf(stderr, "Rank structure word size: %d\n", rank_data_word_size);
+        benchmark_info.threads_per_block = threads_per_block;
+        //        fprintf(stderr, "Rank structure word size: %d\n", rank_data_word_size);
         std::string version = "";
         if (rank_structure_version == kind::poppy)
             version = "poppy";
         if (rank_structure_version == kind::cum_poppy)
             version = "cum-poppy";
+        benchmark_info.rank_structure_version = version;
         fprintf(stderr, "Bits in the bit vector = %" PRIu64 "\n", bits_in_bit_vector);
         if (bit_vector_data_type == epic::kind::sequential_positions)
             fprintf(stderr, "Start position = %" PRIu64 "\n", start_position);
