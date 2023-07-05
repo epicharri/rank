@@ -58,7 +58,7 @@ int BitVector::create(epic::Parameters &parameters, epic::gpu::DeviceStream &dev
   calculate_number_of_words();
   calculate_number_of_words_padded();
   parameters.benchmark_info.number_of_words_in_bit_vector = number_of_words;
-  parameters.benchmark_info.number_of_bytes_padded_bit_vector = host_data.size_in_bytes;
+  parameters.benchmark_info.number_of_bytes_padded_bit_vector = number_of_words_padded * sizeof(u64);
   DEBUG_CODE(fprintf(stderr, "In BitVector::create: number_of_words_padded = %" PRIu64 "\n", number_of_words_padded);)
   calculate_hyperblock_size();
   if (allocate_memory_for_data(parameters, device_stream))

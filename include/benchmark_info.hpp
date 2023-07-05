@@ -56,8 +56,7 @@ struct BenchmarkInfo
 
 int BenchmarkInfo::print_info()
 {
-  fprintf(stderr, "number_of_bits_in_bit_vector \n%" PRIu64 "\nnumber_of_words_in_bit_vector \n%" PRIu64 "\nbits_in_superblock \n%" PRIu64 "\nnumber_of_bytes_padded_bit_vector \n%" PRIu64 "\nnumber_of_bytes_padded_layer_0 \n%" PRIu64 "\nnumber_of_bytes_padded_layer_12 \n%" PRIu64 "\nnumber_of_positions \n%"
-                  "\nstart_position \n%" PRIu64 "\nthreads_per_block \n%" PRIu32 "\number_of_erros \n%" PRIu64 "\nrank_structure_version \n%s\nbit_vector_content\n%s\npositions_type\n%s\nshuffles\n%s\nstore_results_info\n%s\n",
+  fprintf(stderr, "number_of_bits_in_bit_vector \n%" PRIu64 "\nnumber_of_words_in_bit_vector \n%" PRIu64 "\nbits_in_superblock \n%" PRIu64 "\nnumber_of_bytes_padded_bit_vector \n%" PRIu64 "\nnumber_of_bytes_padded_layer_0 \n%" PRIu64 "\nnumber_of_bytes_padded_layer_12 \n%" PRIu64 "\nnumber_of_positions \n%" PRIu64 "\nstart_position \n%" PRIu64 "\nthreads_per_block \n%" PRIu32 "\nnumber_of_errors \n%" PRIu64 "\nrank_structure_version \n%s\nbit_vector_content\n%s\npositions_type\n%s\nshuffles\n%s\nstore_results_info\n%s\n",
           number_of_bits_in_bit_vector,
           number_of_words_in_bit_vector,
           bits_in_superblock,
