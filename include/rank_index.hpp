@@ -87,7 +87,9 @@ inline int RankIndex::allocate_memory(epic::Parameters &parameters, epic::gpu::D
     return 1;
   auto stop = STOP_TIME;
   parameters.benchmark_info.millis_allocate_host_memory_for_L0 = DURATION_IN_MILLISECONDS(start, stop);
-  start = START_TIME if (host_layer_12.create(number_of_words_padded_layer_12 * 8ULL, epic::kind::not_write_only)) return 1;
+  start = START_TIME;
+  if (host_layer_12.create(number_of_words_padded_layer_12 * 8ULL, epic::kind::not_write_only))
+    return 1;
   stop = STOP_TIME;
   parameters.benchmark_info.millis_allocate_host_memory_for_L12 = DURATION_IN_MILLISECONDS(start, stop);
   return 0;
