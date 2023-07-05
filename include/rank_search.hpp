@@ -50,20 +50,17 @@ int RankSearch::fetch_results()
   cudaMemcpyAsync(host_results_out.data, device_positions_in_and_results_out.data, host_results_out.size_in_bytes, cudaMemcpyDeviceToHost, device_stream.stream);
   device_stream.stop_timer();
   millis = device_stream.duration_in_millis();
-  fprintf(stderr, "Fetch results from device to host: %f ms\n", millis);
-  epic::gpu::get_and_print_last_error("After cudaMemcpy in rank_search.hpp fetch_results() ");
+  parameters.benchmark_info.millis_transfer_results_D_to_H = millis;
+  DEBUG_CODE(fprintf(stderr, "Fetch results from device to host: %f ms\n", millis);
+             epic::gpu::get_and_print_last_error("After cudaMemcpy in rank_search.hpp fetch_results() ");)
   return 0;
 }
 
 int RankSearch::save_results(u64 count = 0ULL)
 {
   if (!parameters.store_results)
-  {
-    fprintf(stderr, "Based on the parameter given, the results are not stored.\n");
     return 0;
-  }
-
-  for (u64 i = 0ULL; i < number_of_positions && i < count; i += 1ULL)
+  for (u64 i = 0ULL; i < number_of_positions && i < number_of_positions + count; i += 1ULL)
   {
     fprintf(stdout, "%" PRIu64 " ", host_results_out.data[i]);
   }
@@ -111,17 +108,16 @@ int RankSearch::check()
         }
       }
     }
-    if (number_of_errors)
-    {
-      fprintf(stderr, "ERROR!!! Number of errors is %" PRIu64 "\n", number_of_errors);
-      fprintf(stderr, "First error position: %" PRIu64 "\n", first_error_position);
-      fprintf(stderr, "First error rank: %" PRIu64 "\n", first_error_rank);
-      fprintf(stderr, "First error index: %" PRIu64 "\n", first_error_index);
-    }
-    else
-    {
-      fprintf(stderr, "SUCCESS!!! The rank function returns correct values.\n");
-    }
+    parameters.benchmark_info.number_of_errors = number_of_errors;
+    DEBUG_CODE(
+        if (number_of_errors) {
+          fprintf(stderr, "ERROR!!! Number of errors is %" PRIu64 "\n", number_of_errors);
+          fprintf(stderr, "First error position: %" PRIu64 "\n", first_error_position);
+          fprintf(stderr, "First error rank: %" PRIu64 "\n", first_error_rank);
+          fprintf(stderr, "First error index: %" PRIu64 "\n", first_error_index);
+        } else {
+          fprintf(stderr, "SUCCESS!!! The rank function returns correct values.\n");
+        });
   }
   else
   {
@@ -132,14 +128,15 @@ int RankSearch::check()
 
 int RankSearch::search()
 {
-  fprintf(stderr, "Starting the search.\n");
+  DEBUG_CODE(fprintf(stderr, "Starting the search.\n"););
   float millis = 22222.0;
   millis = call_rank_search(parameters, device_stream, bit_vector, bit_vector.rank_index, device_positions_in_and_results_out, number_of_positions, device_is_nvidia_a100);
-
-  fprintf(stderr, "Search took %f ms.\n", millis);
-  float nanos_per_query = (((double)millis) * 1000000.0) / ((double)number_of_positions);
-  fprintf(stderr, "Search per query %f ns.\n", nanos_per_query);
-  epic::gpu::get_and_print_last_error("After calling call_rank_search() in rank_search.hpp ");
+  parameters.benchmark_info.millis_search = millis;
+  DEBUG_CODE(
+      fprintf(stderr, "Search took %f ms.\n", millis);
+      float nanos_per_query = (((double)millis) * 1000000.0) / ((double)number_of_positions);
+      fprintf(stderr, "Search per query %f ns.\n", nanos_per_query);
+      epic::gpu::get_and_print_last_error("After calling call_rank_search() in rank_search.hpp ");)
   return 0;
 }
 
@@ -150,14 +147,17 @@ int RankSearch::create()
   device_stream.start_timer();
   auto start = START_TIME;
   int created = bit_vector.create(parameters, device_stream);
-  int constructed = bit_vector.construct(device_stream);
+  int constructed = bit_vector.construct(parameters, device_stream);
   device_stream.stop_timer();
   float millis_stream = device_stream.duration_in_millis(); // This synchronizes the stream, i.e. blocks CPU until ready.
+  device_stream.start_timer();
   if (bit_vector.destruct_host_data())
     return 1;
+  device_stream.stop_timer();
+  parameters.benchmark_info.millis_free_host_memory_of_bit_vector();
   auto stop = STOP_TIME;
   float millis = DURATION_IN_MILLISECONDS(start, stop);
-  BENCHMARK_CODE(
+  DEBUG_CODE(
 
       fprintf(stderr, "GPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU takes %f ms.\n", millis_stream);
       fprintf(stderr, "CPU-timer: Creating the bit vector and constructing the rank data structures in CPU and transfer to GPU, including destruction of the host array of the bit vector takes %f ms.\n", millis);)
@@ -170,7 +170,7 @@ int RankSearch::create()
   host_results_out.create(number_of_positions * sizeof(u64), epic::kind::not_write_only);  // This will be written and read.
   device_positions_in_and_results_out.create(number_of_positions * sizeof(u64), device_stream);
 
-  BENCHMARK_CODE(
+  DEBUG_CODE(
       fprintf(stderr, "Number of bits in the bitvector is %" PRIu64 "\n", bit_vector.number_of_bits);
       fprintf(stderr, "Size of the bit vector data array is %" PRIu64 " bytes.\n", bit_vector.device_data.size_in_bytes);
 
@@ -203,9 +203,9 @@ int RankSearch::create()
   float millis_stream_create_positions = device_stream.duration_in_millis(); // This synchronizes the stream, i.e. blocks CPU until ready.
   auto stop_create_positions = STOP_TIME;
   float millis_create_positions = DURATION_IN_MILLISECONDS(start_create_positions, stop_create_positions);
-  BENCHMARK_CODE(fprintf(stderr, "GPU-timer: Creating the random positions and transfer to GPU takes %f ms.\n", millis_stream_create_positions);)
+  DEBUG_CODE(fprintf(stderr, "GPU-timer: Creating the random positions and transfer to GPU takes %f ms.\n", millis_stream_create_positions);)
 
-  BENCHMARK_CODE(fprintf(stderr, "CPU-timer: Creating the random positions and transfer to GPU takes %f ms.\n", millis_create_positions);)
+  DEBUG_CODE(fprintf(stderr, "CPU-timer: Creating the random positions and transfer to GPU takes %f ms.\n", millis_create_positions);)
 
   return 0;
 }

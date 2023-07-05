@@ -1,11 +1,10 @@
 #pragma once
+#include "../include/benchmark_info.hpp"
 #include "../include/enums.hpp"
 #include "../include/globals.hpp"
 #include <regex>
 #include <string>
 #include <vector>
-
-typedef uint32_t u32;
 
 namespace epic
 {
@@ -28,68 +27,6 @@ namespace epic
         std::regex rank_structure_poppy_regex{"^--rank-structure=poppy$"};
         std::regex rank_structure_cum_poppy_regex{"^--rank-structure=cum-poppy$"};
     } Options;
-
-    struct BenchmarkInfo
-    {
-        u64 number_of_bytes_padded_bit_vector = 0ULL;
-        u64 number_of_bytes_padded_layer_0 = 0ULL;
-        u64 number_of_bytes_padded_layer_12 = 0ULL;
-
-        u64 number_of_positions = 0ULL;
-        u32 threads_per_block = 0ULL;
-        std::string rank_structure_version = "";
-        float millis_allocate_host_memory_for_bit_vector = 0.0;
-        float millis_allocate_device_memory_for_bit_vector = 0.0;
-        float millis_allocate_host_memory_for_L0 = 0.0;
-        float millis_allocate_device_memory_for_L0 = 0.0;
-        float millis_allocate_host_memory_for_L12 = 0.0;
-        float millis_allocate_device_memory_for_L12 = 0.0;
-        float millis_free_host_memory_of_bit_vector = 0.0;
-        float millis_transfer_bit_vector_H_to_D = 0.0;
-        float millis_transfer_positions_H_to_D = 0.0;
-        float millis_transfer_results_D_to_H = 0.0;
-        float millis_search = 0.0;
-
-        u64 get_number_of_bits_padded_bit_vector();
-        u64 get_number_of_bytes_padded_bit_vector();
-        u64 get_number_of_words_padded_bit_vector();
-
-        u64 get_number_of_bits_padded_layer_0();
-        u64 get_number_of_bits_padded_layer_12();
-
-        u64 get_number_of_bytes_padded_layer_0();
-        u64 get_number_of_bytes_padded_layer_12();
-
-        u64 get_number_of_words_padded_layer_0();
-        u64 get_number_of_words_padded_layer_12();
-
-        int print_info();
-        BenchmarkInfo() = default;
-    };
-
-    int BenchmarkInfo::print_info()
-    {
-        // Here the printing.
-        return 0;
-    }
-
-    u64 BenchmarkInfo::get_number_of_bits_padded_bit_vector()
-    {
-        return number_of_bytes_padded_bit_vector * 8ULL;
-    }
-
-    u64 BenchmarkInfo::get_number_of_bytes_padded_bit_vector() { return number_of_bytes_padded_bit_vector; }
-
-    u64 BenchmarkInfo::get_number_of_words_padded_bit_vector() { return number_of_bytes_padded_bit_vector / 8ULL; }
-
-    u64 BenchmarkInfo::get_number_of_bits_padded_layer_0() { return number_of_bytes_padded_layer_0 * 8ULL; }
-    u64 BenchmarkInfo::get_number_of_bits_padded_layer_12() { return number_of_bytes_padded_layer_12 * 8ULL; }
-
-    u64 BenchmarkInfo::get_number_of_bytes_padded_layer_0() { return number_of_bytes_padded_layer_0; }
-    u64 BenchmarkInfo::get_number_of_bytes_padded_layer_12() { return number_of_bytes_padded_layer_12; }
-
-    u64 BenchmarkInfo::get_number_of_words_padded_layer_0() { return number_of_bytes_padded_layer_0 / 8ULL; }
-    u64 BenchmarkInfo::get_number_of_words_padded_layer_12() { return number_of_bytes_padded_layer_12 / 8ULL; }
 
     struct Parameters
     {
@@ -242,26 +179,49 @@ namespace epic
                 continue;
             }
         }
+        if (store_results)
+        {
+            benchmark_info.store_results_info = "The results are stored"
+        }
+        else
+        {
+            benchmark_info.store_results_info = "The results are not stored"
+        }
         if (threads_per_block == 0U)
             threads_per_block = max_threads_per_block;
         benchmark_info.threads_per_block = threads_per_block;
-        //        fprintf(stderr, "Rank structure word size: %d\n", rank_data_word_size);
         std::string version = "";
         if (rank_structure_version == kind::poppy)
             version = "poppy";
         if (rank_structure_version == kind::cum_poppy)
             version = "cum-poppy";
         benchmark_info.rank_structure_version = version;
+        benchmark_info.number_of_bits_in_bit_vector = bits_in_bit_vector;
         fprintf(stderr, "Bits in the bit vector = %" PRIu64 "\n", bits_in_bit_vector);
-        if (bit_vector_data_type == epic::kind::sequential_positions)
+        if (positions_type == epic::kind::sequential_positions)
+        {
             fprintf(stderr, "Start position = %" PRIu64 "\n", start_position);
+            benchmark_info.positions_type = "sequential positions";
+            benchmark_info.start_position = start_position;
+        }
+        if (positions_type == epic::kind::random_positions)
+        {
+            benchmark_info.positions_type = "random positions";
+        }
+        benchmark_info.number_of_positions = query_positions_count;
         fprintf(stderr, "Number of positions = %" PRIu64 "\n", query_positions_count);
 
         std::string bit_vector_content = "Bit vector content: after one zero, all bits are ones.";
         if (bit_vector_data_type == epic::kind::random_bit_vector)
         {
             bit_vector_content = "Bit vector content: randomly generated bits.";
+            benchmark_info.bit_vector_content = "random bit vector";
         }
+        if (bit_vector_data_type == epic::kind::one_zero_and_then_all_ones_bit_vector)
+        {
+            benchmark_info.bit_vector_content = "one zero and the rest are ones";
+        }
+        benchmark_info.bits_in_superblock = bits_in_superblock;
         fprintf(stderr, "%s\n", bit_vector_content.data());
 
         fprintf(stderr, "Rank version: %s\n", version.c_str());
@@ -269,25 +229,27 @@ namespace epic
         if (with_shuffles &&
             (bits_in_superblock == 1024 || bits_in_superblock == 2048))
         {
+            benchmark_info.shuffles = "With shuffles";
             fprintf(stderr, "With shuffles.\n");
         }
         else
         {
+            benchmark_info.shuffles = "Without shuffles";
             fprintf(stderr, "Without shuffles.\n");
         }
         fprintf(stderr, "Set LimitMaxL2FetchGranularity in presearch to %d.\n", device_set_limit_presearch);
         fprintf(stderr, "Set LimitMaxL2FetchGranularity in search to %d.\n\n", device_set_limit_search);
-        BENCHMARK_CODE(fprintf(stderr, "Threads per block: %" PRIu32 ".\n", threads_per_block);)
+        DEBUG_CODE(fprintf(stderr, "Threads per block: %" PRIu32 ".\n", threads_per_block);)
         if ((bits_in_superblock == 4096) && (rank_structure_version != kind::poppy))
         {
             fprintf(stderr, "Superblock size 4096 bits is supported only in the rank structure version poppy. Please choose some other parameters.\n");
             return 1;
         }
-        BENCHMARK_CODE(
+        DEBUG_CODE(
 
             fprintf(stderr, "Device name: %s\n", prop.name);
 
-            BENCHMARK_CODE(
+            DEBUG_CODE(
                 fprintf(stderr, "Device Number: %d\n", 0);
                 fprintf(stderr, "  Device name: %s\n", prop.name);
                 fprintf(stderr, "  multiProcessorCount: %d\n", prop.multiProcessorCount);

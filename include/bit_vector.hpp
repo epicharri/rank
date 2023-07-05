@@ -30,9 +30,9 @@ struct BitVector
   void calculate_number_of_words();
   void calculate_number_of_words_padded();
   void calculate_hyperblock_size();
-  int allocate_memory_for_data(epic::gpu::DeviceStream &);
+  int allocate_memory_for_data(epic::Parameters &, epic::gpu::DeviceStream &);
   int create(epic::Parameters &, epic::gpu::DeviceStream &);
-  int construct(epic::gpu::DeviceStream &);
+  int construct(epic::Parameters &, epic::gpu::DeviceStream &);
   BitVector() = default;
   ~BitVector();
 };
@@ -57,18 +57,22 @@ int BitVector::create(epic::Parameters &parameters, epic::gpu::DeviceStream &dev
   DEBUG_CODE(fprintf(stderr, "In BitVector::create(): parameters.number_of_bits = %" PRIu64 "\n", number_of_bits);)
   calculate_number_of_words();
   calculate_number_of_words_padded();
+  parameters.benchmark_info.number_of_words_in_bit_vector = number_of_words;
+  parameters.benchmark_info.number_of_bytes_padded_bit_vector = host_data.size_in_bytes;
   DEBUG_CODE(fprintf(stderr, "In BitVector::create: number_of_words_padded = %" PRIu64 "\n", number_of_words_padded);)
   calculate_hyperblock_size();
-  if (allocate_memory_for_data(device_stream))
+  if (allocate_memory_for_data(parameters, device_stream))
     return 1;
   DEBUG_CODE(fprintf(stderr, "Memory allocated for the bit vector.\n");)
   if (rank_index.create(number_of_bits, number_of_words_padded, parameters.bits_in_superblock, parameters.rank_structure_version, device_stream))
     return 1;
+  parameters.benchmark_info.number_of_bytes_padded_layer_0 = rank_index.host_layer_0.size_in_bytes;
+  parameters.benchmark_info.number_of_bytes_padded_layer_12 = rank_index.host_layer_12.size_in_bytes;
   DEBUG_CODE(fprintf(stderr, "In BitVector, after rank_index.create()\n");)
   return 0;
 }
 
-int BitVector::construct(epic::gpu::DeviceStream &device_stream)
+int BitVector::construct(epic::gpu::Parameters &parameters, epic::gpu::DeviceStream &device_stream)
 {
   auto start = START_TIME;
   if (bit_vector_content == epic::kind::one_zero_and_then_all_ones_bit_vector)
@@ -78,9 +82,9 @@ int BitVector::construct(epic::gpu::DeviceStream &device_stream)
 
   auto stop = STOP_TIME;
   float millis = DURATION_IN_MILLISECONDS(start, stop);
-  BENCHMARK_CODE(fprintf(stderr, "Creating the bit vector takes %f ms\n", millis);)
-  BENCHMARK_CODE(fprintf(stderr, "Bit vector size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded * 8ULL)););
-  BENCHMARK_CODE(fprintf(stderr, "Bit vector size with padding, in bits, is %" PRIu64 " bits.\n", (number_of_words_padded * 64ULL)););
+  DEBUG_CODE(fprintf(stderr, "Creating the bit vector takes %f ms\n", millis);)
+  DEBUG_CODE(fprintf(stderr, "Bit vector size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded * 8ULL)););
+  DEBUG_CODE(fprintf(stderr, "Bit vector size with padding, in bits, is %" PRIu64 " bits.\n", (number_of_words_padded * 64ULL)););
 
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after fill_bit_vector_with_one_bits()\n");)
 
@@ -88,7 +92,8 @@ int BitVector::construct(epic::gpu::DeviceStream &device_stream)
   cudaError_t err = cudaMemcpyAsync(device_data.data, host_data.data, host_data.size_in_bytes, cudaMemcpyHostToDevice, device_stream.stream);
   device_stream.stop_timer();
   millis = device_stream.duration_in_millis();
-  BENCHMARK_CODE(fprintf(stderr, "Transferring the bit vector from host to device takes %f ms\n", millis);)
+  parameters.benchmark_info.millis_bit_vector_H_to_D = millis;
+  DEBUG_CODE(fprintf(stderr, "Transferring the bit vector from host to device takes %f ms\n", millis);)
   DEBUG_CODE(fprintf(stderr, "In BitVector::construct(), after cudaMemcpy, err nro %d\n", err);)
 
   rank_index.construct(host_data, device_stream);
@@ -144,12 +149,18 @@ int BitVector::fill_bit_vector_with_one_bits()
   return 0;
 }
 
-int BitVector::allocate_memory_for_data(epic::gpu::DeviceStream &device_stream)
+int BitVector::allocate_memory_for_data(epic::Parameters &parameters, epic::gpu::DeviceStream &device_stream)
 {
+  auto start = START_TIME;
   if (host_data.create(number_of_words_padded * 8ULL, epic::kind::not_write_only))
     return 1;
+  auto stop = STOP_TIME;
+  parameters.benchmark_info.millis_allocate_host_memory_for_bit_vector = DURATION_IN_MILLISECONDS(start, stop);
+  device_stream.start_timer();
   if (device_data.create(number_of_words_padded * 8ULL, device_stream))
     return 1;
+  device_stream.stop_timer();
+  parameters.benchmark_info.millis_allocate_device_memory_for_bit_vector = device_stream.duration_in_millis();
   return 0;
 }
 

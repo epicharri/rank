@@ -30,7 +30,7 @@ struct RankIndex
   template <u32 words_in_basicblock>
   u64 popcount_basicblock(u64 *, u64);
 
-  int construct(HostArray &, epic::gpu::DeviceStream &);
+  int construct(epic::Parameters &, HostArray &, epic::gpu::DeviceStream &);
   int compute_index(HostArray &, epic::gpu::DeviceStream &, u64);
 
   RankIndex() = default;
@@ -66,8 +66,8 @@ inline int RankIndex::init(u64 the_number_of_bits, u64 the_number_of_words_padde
 
 inline int RankIndex::allocate_memory(epic::gpu::DeviceStream &device_stream)
 {
-  BENCHMARK_CODE(fprintf(stderr, "Layer 0 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_0 * 8ULL)););
-  BENCHMARK_CODE(fprintf(stderr, "Layer 12 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_12 * 8ULL)););
+  DEBUG_CODE(fprintf(stderr, "Layer 0 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_0 * 8ULL)););
+  DEBUG_CODE(fprintf(stderr, "Layer 12 size with padding is %" PRIu64 " bytes.\n", (number_of_words_padded_layer_12 * 8ULL)););
 
   if (device_layer_0.create(
           number_of_words_padded_layer_0 * 8ULL, device_stream) |
@@ -86,7 +86,7 @@ inline int RankIndex::allocate_memory(epic::gpu::DeviceStream &device_stream)
   return 0;
 }
 
-int RankIndex::construct(HostArray &bit_vector_data, epic::gpu::DeviceStream &device_stream)
+int RankIndex::construct(epic::Parameters &parameters, HostArray &bit_vector_data, epic::gpu::DeviceStream &device_stream)
 {
   DEBUG_CODE(fprintf(stderr, "In RankIndex.construct(), before compute_index()\n");)
   if (compute_index(bit_vector_data, device_stream, 0ULL))
