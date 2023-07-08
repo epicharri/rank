@@ -2,7 +2,7 @@ INCLUDE_PATH = ../include
 SOURCE_PATH = src/search.cpp
 BUILD_PATH = build/search
 
-NVCC_FLAGS = -Xcompiler -fopenmp -lgomp -gencode arch=compute_80,code=sm_80 -O3 --include-path $(INCLUDE_PATH) -x cu -g
+NVCC_FLAGS = -Xcompiler "-fopenmp,-lgomp,-march=native, -O3" -gencode arch=compute_80,code=sm_80 -O3 --include-path $(INCLUDE_PATH) -x cu -g
 
 NVCC = nvcc
 
