@@ -21,7 +21,6 @@ namespace epic
         std::string random_bit_vector = "--random-bit-vector";
         std::string one_zero_and_then_all_ones_bit_vector = "--one-zero-and-then-all-ones-bit-vector";
         std::regex query_positions_count{"^--query-positions-count=([0-9]+)$"};
-        std::regex device_set_limit_presearch_regex{"^--device-set-limit-presearch=(32|64|128)$"};
         std::regex device_set_limit_search_regex{"^--device-set-limit-search=(32|64|128)$"};
         std::regex threads_per_block_regex{"^--threads-per-block=([0-9][0-9][0-9]?[0-9]?)$"};
         std::regex rank_structure_poppy_regex{"^--rank-structure=poppy$"};
@@ -36,7 +35,6 @@ namespace epic
         u64 start_position = 0ULL;
         int positions_type = epic::kind::random_positions;
         u32 bits_in_superblock = 1024U; // Default
-        int device_set_limit_presearch = 64;
         int device_set_limit_search = 64;
         bool with_shuffles = false;
         bool store_results = true;
@@ -126,11 +124,6 @@ namespace epic
             if (std::regex_match(parameter, Options.bits_in_superblock_regex))
             {
                 bits_in_superblock = std::stoi(parameter.substr(21, 4));
-                continue;
-            }
-            if (std::regex_match(parameter, Options.device_set_limit_presearch_regex))
-            {
-                device_set_limit_presearch = std::stoi(parameter.substr(29, 3));
                 continue;
             }
             if (std::regex_match(parameter, Options.device_set_limit_search_regex))
@@ -237,7 +230,6 @@ namespace epic
             benchmark_info.shuffles = "Without shuffles";
             fprintf(stderr, "Without shuffles.\n");
         }
-        fprintf(stderr, "Set LimitMaxL2FetchGranularity in presearch to %d.\n", device_set_limit_presearch);
         fprintf(stderr, "Set LimitMaxL2FetchGranularity in search to %d.\n\n", device_set_limit_search);
         DEBUG_CODE(fprintf(stderr, "Threads per block: %" PRIu32 ".\n", threads_per_block);)
         if ((bits_in_superblock == 4096) && (rank_structure_version != kind::poppy))
