@@ -23,7 +23,11 @@ namespace epic
       if (idx < number_of_positions)
       {
         u64 position = positions_in_and_results_out[idx];
-        positions_in_and_results_out[idx] = epic::gpu::rank<superblock_size, shuffles, rank_version>(bit_vector, L0, L12, position);
+        for (u32 k = 0U; k < 100U; k += 1U)
+        {
+          position = epic::gpu::rank<superblock_size, shuffles, rank_version>(bit_vector, L0, L12, position);
+        }
+        positions_in_and_results_out[idx] = position;
       }
     }
   }
