@@ -33,8 +33,7 @@ namespace epic
           positions_in_and_results_out.data,
           number_of_positions);
       device_stream.stop_timer();
-      
-      epic::gpu::get_and_print_last_error("After calling rank_search<> in kernel_launcher.hpp: ");
+
       return device_stream.duration_in_millis();
     }
   }
